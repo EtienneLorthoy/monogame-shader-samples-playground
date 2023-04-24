@@ -58,7 +58,7 @@ namespace MonogameShaderPlayground
             // Starting playground
             this.label = new SimpleLabel(this);
             var startingIndex = 2;
-            this.label.Text = playgrounds[startingIndex].GetType().Name + " - Press space to switch playgrounds";
+            this.label.Text = playgrounds[startingIndex].GetType().Name + " - SPACE: switch playgrounds, R: auto-rotate";
             this.Components.Add(label);
             this.Components.Add(playgrounds[startingIndex]);
 

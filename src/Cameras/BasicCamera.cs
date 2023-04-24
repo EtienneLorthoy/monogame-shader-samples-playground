@@ -39,12 +39,19 @@ namespace MonogameShaderPlayground.Cameras
                 cameraPosition.Z = (float)(Math.Cos(Mouse.GetState().X / 100f) * 2f);
                 cameraPosition.Y = (float)(Math.Cos(Mouse.GetState().Y / 100f) * 2f);
             }
+            else if (Keyboard.GetState().IsKeyDown(Keys.R))
+            {
+                cameraPosition.X = (float)(Math.Cos(gameTime.TotalGameTime.TotalSeconds) *2f);
+                cameraPosition.Z = (float)(Math.Sin(gameTime.TotalGameTime.TotalSeconds) *2f);
+                cameraPosition.Y = (float)(Math.Cos(gameTime.TotalGameTime.TotalSeconds *3) *2f);
+            }
 
             // Update Camera
             if (this.Game.IsActive)
             {
                 Matrix.CreateLookAt(ref cameraPosition, ref cameraTarget, ref cameraUp, out view);
             }
+
 
             base.Update(gameTime);
         }
