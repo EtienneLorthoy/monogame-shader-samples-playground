@@ -21,16 +21,21 @@ namespace MonogameShaderPlayground.Primitives
         private Effect effect;
         private Texture2D texture;
 
+        private HotReloadShaderManager hotReloadShaderManager;
+
         public HologramIridiscenceRayMarchingPlayground(Game game, BasicCamera camera) : base(game)
         {
             this.camera = camera;
+
+            this.hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\ShadertoyExports\HologramIridiscenceRayMarching\HologramIridiscenceRayMarchingShader.fx");
         }
 
         public override void Initialize()
         {
             if (effect == null)
             {
-                effect = Game.Content.Load<Effect>("Shaders/HologramIridiscenceRayMarchingShader");
+                effect = hotReloadShaderManager.Load("Shaders/HologramIridiscenceRayMarchingShader");
+                // effect = Game.Content.Load<Effect>("Shaders/HologramIridiscenceRayMarchingShader");
                 
                 screenWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
                 screenHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;
@@ -51,6 +56,11 @@ namespace MonogameShaderPlayground.Primitives
 
         public override void Update(GameTime gameTime)
         {
+            if (hotReloadShaderManager.CheckForChanges())
+            {
+                effect = hotReloadShaderManager.Load("Shaders/HologramIridiscenceRayMarchingShader");
+            }
+
             effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.Projection);
             effect.Parameters["iTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
@@ -62,12 +72,6 @@ namespace MonogameShaderPlayground.Primitives
 
         public override void Draw(GameTime gameTime)
         {
-            // Using a sprite batch to render on screen
-            // spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, effect, null);
-            // spriteBatch.Draw(texture, new Rectangle(0, 0, screenWidth, screenHeight), Color.White);
-            // spriteBatch.End();
-
-            // or using a vertex buffer to render on screen
             foreach (var pass in effect.CurrentTechnique.Passes)
             {
                 pass.Apply();

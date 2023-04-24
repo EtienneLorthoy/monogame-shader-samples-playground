@@ -11,9 +11,9 @@ using Microsoft.Xna.Framework.Graphics;
 namespace MonogameShaderPlayground.Helpers
 {
     #if DEBUG
-    public static class HotReloadShaderManager
+    public class HotReloadShaderManager
     {
-        private static readonly string BasePath = System.Reflection
+        private static readonly string BinPath = System.Reflection
                                                         .Assembly
                                                         .GetEntryAssembly()
                                                         .Location
@@ -23,61 +23,67 @@ namespace MonogameShaderPlayground.Helpers
                                                                             .Location
                                                                             .LastIndexOf('\\') + 1);
 
-        private static ContentManager TempContent;
-        private static DateTime LastUpdate;
-        private static string FXFilesFolderPath = BasePath + "../../Content/Shaders/";
+        private static readonly string SrcPath = new DirectoryInfo(Path.Combine(BinPath, "..\\..\\..\\")).FullName;
 
-        private static Dictionary<string, Effect> Shaders;
-        private static ContentManager content;
-        private static GraphicsDevice device;
-        private static SimpleLabel label;
+        private string fXFilePath;
+        private string shaderIdentifier;
 
-        public static void Initialize(Game game)
+        private ContentManager TempContent;
+        private DateTime LastUpdate;
+
+        private Effect Shader;
+        private ContentManager content;
+        private GraphicsDevice device;
+        private SimpleLabel label;
+
+        public HotReloadShaderManager(Game game, string relativeFxFilePath)
         {
+            this.fXFilePath = SrcPath + relativeFxFilePath;
+
+            if (!File.Exists(fXFilePath)) throw new ArgumentException("HotReloadShaderManager: Can't find " + fXFilePath);
+
             var game1 = game as Game1;
-            HotReloadShaderManager.content = game.Content;
-            HotReloadShaderManager.device = game.GraphicsDevice;
-            HotReloadShaderManager.label = game1.label;
-            HotReloadShaderManager.Shaders = new Dictionary<string, Effect>();
-            HotReloadShaderManager.TempContent = new ContentManager(content.ServiceProvider, content.RootDirectory);
-            HotReloadShaderManager.LastUpdate = DateTime.Now;
+            this.content = game.Content;
+            this.device = game.GraphicsDevice;
+            this.label = game1.label;
+            this.Shader = null;
+            this.TempContent = new ContentManager(content.ServiceProvider, content.RootDirectory);
+            this.LastUpdate = DateTime.Now;
         }
 
-        public static bool CheckForChanges()
+        public bool CheckForChanges()
         {
             var isChanges = false;
-            var files = Directory.GetFiles(FXFilesFolderPath, "*.fx");
-            foreach (var file in files)
+            var file = new FileInfo(fXFilePath);
+            if (file.LastWriteTime > LastUpdate)
             {
-                var t = File.GetLastWriteTime(file);
-                if (t > LastUpdate)
-                {
-                    ShaderChanged(file);
-                    LastUpdate = t;
-                    isChanges = true;
-                }
+                ShaderChanged();
+                LastUpdate = file.LastWriteTime;
+                isChanges = true;
             }
             return isChanges;
         }
 
-        private static void ShaderChanged(string path)
+        private void ShaderChanged()
         {
-            string name = Path.GetFileNameWithoutExtension(path);
+            string filename = Path.GetFileNameWithoutExtension(fXFilePath);
 
-            //Folder and files check
-            var baseFolder = new DirectoryInfo(BasePath).Parent.Parent.Parent;
-            var shadersSourceFolder = baseFolder.GetDirectories("Shaders", SearchOption.AllDirectories).FirstOrDefault();
-            var packagesFolder = baseFolder.GetDirectories("packages", SearchOption.AllDirectories).FirstOrDefault(); 
-            var shadersOutputFolder = new DirectoryInfo(BasePath).GetDirectories("Shaders", SearchOption.AllDirectories).FirstOrDefault();
+            // Folder and files check
+            var shaderSourceFolder = new DirectoryInfo(Path.GetDirectoryName(fXFilePath));
+            if (shaderSourceFolder == null) label.Text = "HotReloadShaderManager: Can't find Shaders source folder";
 
-            if (shadersSourceFolder == null) label.Text = "HotReloadShaderManager: Can't find Shaders source folder";
-            if (packagesFolder == null) label.Text = "HotReloadShaderManager: Can't find packages folder";
-            if (shadersOutputFolder == null) label.Text = "HotReloadShaderManager: Can't find shaders output folder";
+            // Prepare the build output folder (for building the shader)
+            var shaderBuildOutputFolder = Path.Combine(new DirectoryInfo(SrcPath).GetDirectories("bin").FirstOrDefault().FullName, "hotreloadshaders");
+            if (Directory.Exists(shaderBuildOutputFolder)) Directory.Delete(shaderBuildOutputFolder, true);
+            Directory.CreateDirectory(shaderBuildOutputFolder);
 
-            var mgcbPath = Path.Combine(packagesFolder.FullName, "dotnet-mgcb", "3.8.1.303", "tools", "net6.0", "any", "mgcb.dll");
-            if (!File.Exists(mgcbPath)) label.Text = "HotReloadShaderManager: Can't find mgcb.dll";
+            // Shader output folder (for the actual Monogame runtime)
+            var shaderOutputFolder = new DirectoryInfo(BinPath + "Content//Shaders");
+            if (shaderOutputFolder == null) label.Text = "HotReloadShaderManager: Can't find Shaders output folder";
 
-            var mgcbBuildArguments = " /platform:Windows /config: /profile:HiDef /compress:False /importer:EffectImporter /processor:EffectProcessor /processorParam:DebugMode=Auto /build:"+name+".fx";
+            var mgcbBuildArguments = " mgcb /platform:Windows /config: /profile:HiDef /compress:False /importer:EffectImporter /r" 
+                + " /processor:EffectProcessor /processorParam:DebugMode=Auto /build:" + fXFilePath
+                + " /outputDir:" + shaderBuildOutputFolder;
 
             // Prepare the process to run
             Process pProcess = new Process
@@ -85,9 +91,9 @@ namespace MonogameShaderPlayground.Helpers
                 StartInfo =
                 {
                     FileName = "dotnet",
-                    Arguments = mgcbPath + mgcbBuildArguments,
+                    Arguments = mgcbBuildArguments,
                     CreateNoWindow = true,
-                    WorkingDirectory = shadersSourceFolder.ToString(),
+                    WorkingDirectory = SrcPath,
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     RedirectStandardOutput = true
@@ -109,35 +115,30 @@ namespace MonogameShaderPlayground.Helpers
 
                 if (pProcess.ExitCode != 0)
                 {
-                    label.Text = "HotReloadShaderManager: Error while building shader " + name + ".fx";
-                    label.Text += stdError;
-                    label.Text += stdOutput.ToString();
+                    label.WriteLine("HotReloadShaderManager: Error while building shader " + filename + ".fx"
+                        + stdError
+                        + stdOutput.ToString()); 
                     return;
                 }
                 pProcess.Dispose();
 
                 // Copy the xnb to the output folder
-                string builtPath = shadersSourceFolder + "\\" + name + ".xnb";
-                string movePath = shadersOutputFolder + "\\" + name + ".xnb";
-                File.Copy(builtPath, movePath, true);
+                string builtPath = new DirectoryInfo(shaderBuildOutputFolder).GetFiles(filename + ".xnb", SearchOption.AllDirectories)
+                                                                              .FirstOrDefault().FullName;
+                string movePath = shaderOutputFolder + "\\" + filename + ".xnb";
+                File.Move(builtPath, movePath, true);
 
                 ContentManager newTemp = new ContentManager(TempContent.ServiceProvider, TempContent.RootDirectory);
-                var newShaders = new Dictionary<string, Effect>();
-                foreach (var shaderName in Shaders.Keys)
-                {
-                    var effect = newTemp.Load<Effect>(shaderName);
-                    newShaders.Add(shaderName.ToLower(), effect);
-                }
 
                 TempContent.Unload();
                 TempContent.Dispose();
                 TempContent = newTemp;
-                Shaders = newShaders;
-                label.Text = "Shader " + name + " reloaded";
+                Shader = newTemp.Load<Effect>(shaderIdentifier);
+                label.Text = "Shader " + filename + " reloaded";
             }
             catch (Exception e)
             {
-                label.Text = e.Message;
+                label.WriteLine(e.Message);
             }
             finally
             {
@@ -145,19 +146,11 @@ namespace MonogameShaderPlayground.Helpers
             }
         }
 
-        public static Effect Load(string name)
+        public Effect Load(string name)
         {
-            if (!Shaders.ContainsKey(name.ToLower()))
-            {
-                var shader = content.Load<Effect>(name);
-                Shaders.Add(name.ToLower(), shader);
-            }
-            else
-            {
-                Shaders[name.ToLower()] = TempContent.Load<Effect>(name);
-            }
-
-            return Shaders[name.ToLower()];
+            this.shaderIdentifier = name;
+            if (Shader == null) Shader = TempContent.Load<Effect>(name);
+            return Shader;
         }
     }
     #endif

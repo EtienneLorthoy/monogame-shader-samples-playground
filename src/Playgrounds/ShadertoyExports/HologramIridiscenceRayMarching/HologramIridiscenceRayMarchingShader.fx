@@ -40,7 +40,7 @@ float2 mouse;
 #define MRY(X) float3x3(cos(X), 0., sin(X),0., 1., 0.,-sin(X), 0., cos(X))	//y axis rotation matrix	
 #define MRZ(X) float3x3(cos(X), -sin(X), 0.	,sin(X), cos(X), 0.	,0., 0., 1.)	//z axis rotation matrix
 #define MRF(X,Y,Z) MRZ(Z)*MRY(Y)*MRX(X)	//x,y,z combined rotation macro
-#define ROT 0.1 //MRF(iTime * .1 + mouse.y, iTime * .2 + mouse.x, iTime * .3)
+#define ROT 0.9*cos(iTime) //MRF(iTime * .1 + mouse.y, iTime * .2 + mouse.x, iTime * .3)
 const int iter = 256;
 const float far = 1000.;
 #define EPSILON 0.00001
@@ -210,8 +210,8 @@ float4 PS(VertexOut input) : SV_TARGET
 	// We could remove the *800f and the iResolution variable and just use the texture coordinates
 	// But I wanted to show with little to no modifications with the original Shadertoy shader.
 	// (beside converting it from GLSL to HLSL)
-	float4 baseColor = mainImage(input.TexCoord*800.0f);
-	baseColor.R = 1.0f;
+	float4 baseColor = mainImage(input.Position);
+	baseColor.a = 0.8f;
 	return baseColor;
 }
 

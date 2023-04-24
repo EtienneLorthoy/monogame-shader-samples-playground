@@ -39,6 +39,7 @@ namespace MonogameShaderPlayground
             graphics.ApplyChanges();
 
             this.Components.Add(Camera);
+            this.label = new SimpleLabel(this);
 
             // Shadertoy exports
             playgrounds.Add(new RaymarchingShaderBlock(this, Camera));
@@ -57,7 +58,6 @@ namespace MonogameShaderPlayground
             playgrounds.Add(new SimpleParallaxMappingShaderPlayground(this, Camera));
 
             // Starting playground
-            this.label = new SimpleLabel(this);
             var startingIndex = 3;
             this.label.Text = playgrounds[startingIndex].GetType().Name + " - SPACE: switch playgrounds, R: auto-rotate";
             this.Components.Add(label);
