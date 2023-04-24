@@ -26,7 +26,7 @@
 
 uniform float iTime;
 uniform float2 iResolution;
-uniform Texture3D iChannel0;
+uniform Texture2D iChannel0;
 uniform float4 iMouse;
 float4x4 WorldViewProjection;
 

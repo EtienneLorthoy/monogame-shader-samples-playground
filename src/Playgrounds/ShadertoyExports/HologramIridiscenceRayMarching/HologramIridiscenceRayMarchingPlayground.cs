@@ -9,9 +9,9 @@ namespace MonogameShaderPlayground.Primitives
     /// <summary>
     /// Based on https://www.shadertoy.com/view/XlcBR7
     /// </summary>
-    public class HologramIridiscenceRayMarching : DrawableGameComponent
+    public class HologramIridiscenceRayMarchingPlayground : DrawableGameComponent
     {
-        private VertexPosition[] meshVertices;
+        private VertexPositionTexture[] meshVertices;
         private BasicCamera camera;
 
         private SpriteBatch spriteBatch;
@@ -21,7 +21,7 @@ namespace MonogameShaderPlayground.Primitives
         private Effect effect;
         private Texture2D texture;
 
-        public HologramIridiscenceRayMarching(Game game, BasicCamera camera) : base(game)
+        public HologramIridiscenceRayMarchingPlayground(Game game, BasicCamera camera) : base(game)
         {
             this.camera = camera;
         }
@@ -31,7 +31,7 @@ namespace MonogameShaderPlayground.Primitives
             if (effect == null)
             {
                 effect = Game.Content.Load<Effect>("Shaders/HologramIridiscenceRayMarchingShader");
-
+                
                 screenWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
                 screenHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;
                 Vector2 screenResolution = new Vector2(screenWidth, screenHeight);
@@ -44,7 +44,7 @@ namespace MonogameShaderPlayground.Primitives
                 effect.Parameters["iChannel0"].SetValue(texture);
             }
 
-            meshVertices = VertexsBuilderHelper.ConstructVertexPositionCube(new Vector3(-0.5f, -0.5f, -0.5f), 1);
+            meshVertices = VertexsBuilderHelper.ConstructVertexPositionTextureCube(new Vector3(-0.5f, -0.5f, -0.5f), 1f);
 
             spriteBatch = new SpriteBatch(GraphicsDevice);
         }

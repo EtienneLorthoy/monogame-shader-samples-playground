@@ -44,6 +44,7 @@ namespace MonogameShaderPlayground
             playgrounds.Add(new RaymarchingShaderBlock(this, Camera));
             playgrounds.Add(new VoroShaderBlock(this, Camera));
             playgrounds.Add(new ShadertoyExport3DProjected(this, Camera));
+            playgrounds.Add(new HologramIridiscenceRayMarchingPlayground(this, Camera));
 
             // Rendering to texture techniques
             playgrounds.Add(new RenderToTexturePlayground(this, Camera));
@@ -57,7 +58,7 @@ namespace MonogameShaderPlayground
 
             // Starting playground
             this.label = new SimpleLabel(this);
-            var startingIndex = 2;
+            var startingIndex = 3;
             this.label.Text = playgrounds[startingIndex].GetType().Name + " - SPACE: switch playgrounds, R: auto-rotate";
             this.Components.Add(label);
             this.Components.Add(playgrounds[startingIndex]);

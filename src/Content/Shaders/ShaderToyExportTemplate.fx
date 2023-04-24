@@ -26,6 +26,19 @@
 // uniform float iSampleRate;
 // uniform vec3 iChannelResolution[4];
 // uniform samplerXX iChanneli;
+// uniform Texture2D iChannel0;
+// uniform Texture2D iChannel1;
+// uniform Texture2D iChannel2;
+// uniform Texture2D iChannel3;
+
+// For use with Texture2D as like iChannel0.Sample(samplerState, uvm) instead of texture(iChannel0, uvm)
+// SamplerState samplerState
+// {
+// 	Filter = Linear; // Use trilinear filtering
+// 	AddressU = WRAP;             // Wrap texture coordinates in the U direction
+// 	AddressV = WRAP;             // Wrap texture coordinates in the V direction
+// 	AddressW = WRAP;             // Wrap texture coordinates in the W direction
+// };
 
 float4 mainImage(float2 fragCoord)
 {
@@ -93,7 +106,7 @@ float4 PS(VertexOut input) : SV_TARGET
 technique Technique0
 {
 	pass P0
-	{r
+	{
 		VertexShader = compile VS_SHADERMODEL VS();
 		PixelShader = compile PS_SHADERMODEL PS();
 	}
