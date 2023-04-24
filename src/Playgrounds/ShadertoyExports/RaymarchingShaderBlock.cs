@@ -11,6 +11,10 @@ namespace MonogameShaderPlayground.Primitives
         private VertexPosition[] meshVertices;
         private BasicCamera camera;
 
+        private SpriteBatch spriteBatch;
+        private int screenWidth;
+        private int screenHeight;
+
         private Effect effect;
         private Texture2D texture;
 
@@ -25,8 +29,8 @@ namespace MonogameShaderPlayground.Primitives
             {
                 effect = Game.Content.Load<Effect>("Shaders/Raymarching");
 
-                int screenWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
-                int screenHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;
+                screenWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
+                screenHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;
                 Vector2 screenResolution = new Vector2(screenWidth, screenHeight);
                 effect.Parameters["iResolution"].SetValue(screenResolution);
             }
@@ -38,6 +42,8 @@ namespace MonogameShaderPlayground.Primitives
             }
 
             meshVertices = VertexsBuilderHelper.ConstructVertexPositionCube(new Vector3(-0.5f, -0.5f, -0.5f), 1);
+
+            spriteBatch = new SpriteBatch(GraphicsDevice);
         }
 
         public override void Update(GameTime gameTime)
@@ -53,6 +59,12 @@ namespace MonogameShaderPlayground.Primitives
 
         public override void Draw(GameTime gameTime)
         {
+            // Using a sprite batch to render on screen
+            // spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, effect, null);
+            // spriteBatch.Draw(texture, new Rectangle(0, 0, screenWidth, screenHeight), Color.White);
+            // spriteBatch.End();
+
+            // or using a vertex buffer to render on screen
             foreach (var pass in effect.CurrentTechnique.Passes)
             {
                 pass.Apply();

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -12,8 +11,8 @@ namespace MonogameShaderPlayground
     public class Game1 : Game
     {
         public BasicCamera Camera;
+        public SimpleLabel label;
 
-        private SimpleLabel label;
         private GraphicsDeviceManager graphics;
         private KeyboardState lastKeyboardState;
         private List<DrawableGameComponent> playgrounds = new List<DrawableGameComponent>();
@@ -42,8 +41,9 @@ namespace MonogameShaderPlayground
             this.Components.Add(Camera);
 
             // Shadertoy exports
-            playgrounds.Add(new VoroShaderBlock(this, Camera));
             playgrounds.Add(new RaymarchingShaderBlock(this, Camera));
+            playgrounds.Add(new VoroShaderBlock(this, Camera));
+            playgrounds.Add(new ShadertoyExport3DProjected(this, Camera));
 
             // Rendering to texture techniques
             playgrounds.Add(new RenderToTexturePlayground(this, Camera));
@@ -57,9 +57,10 @@ namespace MonogameShaderPlayground
 
             // Starting playground
             this.label = new SimpleLabel(this);
-            this.label.Text = "Press space to switch playgrounds";
+            var startingIndex = 2;
+            this.label.Text = playgrounds[startingIndex].GetType().Name + " - Press space to switch playgrounds";
             this.Components.Add(label);
-            this.Components.Add(playgrounds[3]);
+            this.Components.Add(playgrounds[startingIndex]);
 
             // Utils
             this.Components.Add(new Gizmo(this));

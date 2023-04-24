@@ -12,7 +12,6 @@ namespace MonogameShaderPlayground.Primitives
         public IndexBuffer indexBuffer { get; private set; }
 
         private BasicCamera camera;
-
         private Effect effect;
 
         public SimpleAmbiantDiffuseSpecularLightingShaderPlayground(Game game, BasicCamera camera) : base(game)
