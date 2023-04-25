@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonogameShaderPlayground.Helpers;
-using MonogameShaderPlayground.Playgrounds.ShadertoyExports.HologramIridescenceRayMarching;
+using MonogameShaderPlayground.Playgrounds.HologramIridescenceRayMarching;
 using MonogameShaderPlayground.Primitives;
 
 namespace MonogameShaderPlayground

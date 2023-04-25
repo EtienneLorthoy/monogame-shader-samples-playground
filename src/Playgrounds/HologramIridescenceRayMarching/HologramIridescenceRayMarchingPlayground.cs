@@ -2,7 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonogameShaderPlayground.Helpers;
 
-namespace MonogameShaderPlayground.Playgrounds.ShadertoyExports.HologramIridescenceRayMarching
+namespace MonogameShaderPlayground.Playgrounds.HologramIridescenceRayMarching
 {
     /// <summary>
     /// Based on https://www.shadertoy.com/view/XlcBR7
@@ -22,7 +22,7 @@ namespace MonogameShaderPlayground.Playgrounds.ShadertoyExports.HologramIridesce
         {
             this.camera = camera;
 
-            this.hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\ShadertoyExports\HologramIridescenceRayMarching\HologramIridescenceRayMarchingShader.fx");
+            hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\HologramIridescenceRayMarching\HologramIridescenceRayMarchingShader.fx");
         }
 
         public override void Initialize()
@@ -31,7 +31,7 @@ namespace MonogameShaderPlayground.Playgrounds.ShadertoyExports.HologramIridesce
             {
                 effect = hotReloadShaderManager.Load("Shaders/HologramIridescenceRayMarchingShader");
                 // effect = Game.Content.Load<Effect>("Shaders/HologramIridescenceRayMarchingShader");
-                effect.Parameters["iChannel0"]?.SetValue( Game.Content.Load<Texture2D>("Textures/iridescence"));
+                effect.Parameters["iChannel0"]?.SetValue(Game.Content.Load<Texture2D>("Textures/iridescence"));
             }
 
             meshVertices = VertexsBuilderHelper.ConstructVertexPositionNormalTextureCube(new Vector3(-0.5f, -0.5f, -0.5f), 1f);
@@ -44,7 +44,7 @@ namespace MonogameShaderPlayground.Playgrounds.ShadertoyExports.HologramIridesce
             if (hotReloadShaderManager.CheckForChanges())
             {
                 effect = hotReloadShaderManager.Load("Shaders/HologramIridescenceRayMarchingShader");
-                effect.Parameters["iChannel0"]?.SetValue( Game.Content.Load<Texture2D>("Textures/iridescence"));
+                effect.Parameters["iChannel0"]?.SetValue(Game.Content.Load<Texture2D>("Textures/iridescence"));
             }
 
             effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.Projection);
