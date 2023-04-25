@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-   <a>Monogame Shader Playgrounds - Yet another examples of basic HLSL shaders for Monogame</a>
+   <a>Monogame Shader Playgrounds - Yet another set of basic HLSL shaders examples for Monogame</a>
   <br>
 </h1>
 
