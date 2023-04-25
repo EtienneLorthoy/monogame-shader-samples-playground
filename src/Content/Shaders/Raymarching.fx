@@ -12,6 +12,13 @@
 // Global parameters
 //==============================================================================
 
+uniform float4x4 WorldViewProjection;
+
+
+//==============================================================================
+// Global parameters
+//==============================================================================
+
 // Helper parameters used in shadertoy shaders
 // uniform vec3 iResolution;
 // uniform float iTime;
@@ -28,7 +35,6 @@ uniform float iTime;
 uniform float2 iResolution;
 uniform Texture2D iChannel0;
 uniform float4 iMouse;
-float4x4 WorldViewProjection;
 
 SamplerState samplerState
 {
@@ -60,11 +66,14 @@ struct VertexOut
 VertexOut VS(in VertexIn input)
 {
     VertexOut output;
-    
     output.Position = mul(float4(input.Position, 1), WorldViewProjection);
-	
     return output;
 }
+
+
+//==============================================================================
+// Pixel shader
+//==============================================================================
 
 // ray marching
 const int max_iterations = 128;
@@ -309,11 +318,6 @@ void mainImage( out float4 fragColor, in float2 fragCoord )
 	fragColor = float4( pow( color, float3(1.0/1.2, 1.0/1.2, 1.0/1.2) ), 1.0 );
 }
 
-//==============================================================================
-// Entry Point
-//==============================================================================
-
-
 float4 PS(VertexOut input) : SV_TARGET
 {
 	float4 colorIn = float4(0, 0, 0, 1);
@@ -321,6 +325,7 @@ float4 PS(VertexOut input) : SV_TARGET
 	mainImage(colorIn, pos);
 	return colorIn;
 }
+
 
 //==============================================================================
 // Techniques

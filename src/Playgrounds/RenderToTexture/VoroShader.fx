@@ -7,21 +7,53 @@
 	#define PS_SHADERMODEL ps_4_0
 #endif
 
+
 //==============================================================================
 // Global parameters
 //==============================================================================
 
-// Helper parameters used in shadertoy shaders
-// uniform vec3 iResolution;
-// uniform float iTime;
-// uniform float iTimeDelta;
-// uniform float iFrame;
-// uniform float iChannelTime[4];
-// uniform vec4 iMouse;
-// uniform vec4 iDate;
-// uniform float iSampleRate;
-// uniform vec3 iChannelResolution[4];
-// uniform samplerXX iChanneli;
+uniform texture2D ColorMap;
+uniform sampler2D ColorMapSampler = sampler_state
+{
+    Texture = <ColorMap>;
+    MinFilter = linear;
+    MagFilter = linear;
+    MipFilter = linear;
+};
+
+uniform float4x4 WorldViewProjection;
+uniform float3 CameraPosition;
+
+//==============================================================================
+// Interstage structures
+//==============================================================================
+
+struct VertexIn
+{
+	float3 Position : POSITION;
+    float2 TexCoord : TEXCOORD0;
+};
+
+struct VertexOut
+{
+	float4 Position : SV_POSITION;
+    float2 TexCoord : TEXCOORD0;
+};
+
+
+//==============================================================================
+// Vertex shader
+//==============================================================================
+
+VertexOut VS2(VertexIn input)
+{
+	VertexOut vout = (VertexOut)0;
+
+	vout.Position = mul(float4(input.Position, 1.0f), WorldViewProjection);		
+	vout.TexCoord = input.TexCoord;
+
+	return vout;
+}
 
 
 //==============================================================================
@@ -57,17 +89,6 @@
 
 uniform float iTime;
 uniform float2 iResolution; 
-
-// uniform vec3 iResolution;
-// uniform float iTime;
-// uniform float iTimeDelta;
-// uniform float iFrame;
-// uniform float iChannelTime[4];
-// uniform vec4 iMouse;
-// uniform vec4 iDate;
-// uniform float iSampleRate;
-// uniform vec3 iChannelResolution[4];
-// uniform samplerXX iChanneli;
 
 // float2 to float2 hash.
 float2 hash22(float2 p) { 
@@ -183,58 +204,6 @@ float4 PS1(float4 Position : POSITION0) : COLOR0
 	return color;
 }
 
-//==============================================================================
-// Techniques Projection
-//==============================================================================
-//==============================================================================
-// Global parameters
-//==============================================================================
-
-texture2D ColorMap;
-sampler2D ColorMapSampler = sampler_state
-{
-    Texture = <ColorMap>;
-    MinFilter = linear;
-    MagFilter = linear;
-    MipFilter = linear;
-};
-
-float4x4 WorldViewProjection;
-float3 CameraPosition;
-
-//==============================================================================
-// Interstage structures
-//==============================================================================
-struct VertexIn
-{
-	float3 Position : POSITION;
-    float2 TexCoord : TEXCOORD0;
-};
-
-struct VertexOut
-{
-	float4 Position : SV_POSITION;
-    float2 TexCoord : TEXCOORD0;
-};
-
-//==============================================================================
-// Vertex shader
-//==============================================================================
-
-VertexOut VS2(VertexIn input)
-{
-	VertexOut vout = (VertexOut)0;
-
-	vout.Position = mul(float4(input.Position, 1.0f), WorldViewProjection);		
-	vout.TexCoord = input.TexCoord;
-
-	return vout;
-}
-
-//==============================================================================
-// Pixel shader
-//==============================================================================
-
 const float4 AmbientColor = float4(1.0f,1.0f,1.0f,0.0f);
 const float AmbientIntensity = 0.8f;
 
@@ -248,6 +217,7 @@ float4 PS2(VertexOut input) : SV_TARGET
  
 	return result;
 }
+
 
 //==============================================================================
 // Techniques

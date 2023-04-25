@@ -12,12 +12,50 @@
 // Global parameters
 //==============================================================================
 
-float4x4 WorldViewProjection;
-float3 CameraPosition;
+uniform float4x4 WorldViewProjection;
+uniform float3 CameraPosition;
+
 
 //==============================================================================
-// ShaderToy export based on https://www.shadertoy.com/view/XlcBR7
+// Interstage structures
 //==============================================================================
+
+struct VertexIn
+{
+	float3 Position : POSITION0;
+    float2 TexCoord : TEXCOORD0;
+    float3 Normal : NORMAL0;
+};
+
+struct VertexOut
+{
+	float4 Position : SV_POSITION;
+    float2 TexCoord : TEXCOORD0;
+    float3 Normal : NORMAL0;
+};
+
+
+//==============================================================================
+// Vertex shader
+//==============================================================================
+
+VertexOut VS(in VertexIn input)
+{
+	VertexOut vout = (VertexOut)0;
+
+	vout.Position = mul(float4(input.Position, 1.0f), WorldViewProjection);		
+	vout.TexCoord = input.TexCoord;
+    vout.Normal = input.Normal;
+
+	return vout;
+}
+
+
+//==============================================================================
+// Pixel shader
+//==============================================================================
+
+// ShaderToy export based on https://www.shadertoy.com/view/XlcBR7
 
 uniform float iTime;
 uniform Texture2D iChannel0;
@@ -32,18 +70,12 @@ SamplerState samplerState
 const float iridStrength = 0.5;
 const float iridSaturation = 0.9;
 const float fresnelStrength = 1.5;
-//const float3 lightCol = float3(.02, .7, .02);
+const float3 lightPos = float3(2.0, 2.0, -5.0);
 const float3 lightCol = float3(.2, .7, .2);
 
 const int iter = 1;
 const float far = 1000.;
 #define EPSILON 0.00001
-
-#define MRX(X) float3x3(1., 0., 0. ,0., cos(X), -sin(X) ,0., sin(X), cos(X))	//x axis rotation matrix
-#define MRY(X) float3x3(cos(X), 0., sin(X),0., 1., 0.,-sin(X), 0., cos(X))	//y axis rotation matrix	
-#define MRZ(X) float3x3(cos(X), -sin(X), 0.	,sin(X), cos(X), 0.	,0., 0., 1.)	//z axis rotation matrix
-#define MRF(X,Y,Z) mul(mul(MRZ(Z),MRY(Y)),MRX(X))	//x,y,z combined rotation macro
-#define ROT MRF(0., 0., 0.)
 
 //iq's signed-box distance function
 float sdBox( float3 p, float3 b )
@@ -113,7 +145,6 @@ float4 mainImage(float2 fragCoord, float3 faceNormal)
     float dUp = dot(rpco, up);//up surface vector
     
     //lights
-    float3 lightPos = float3(cos(iTime)*2., 2., sin(iTime)*2.);
     float3 lightDir = normalize(-lightPos);
     float ldc = dot(lightDir, -nc);
     float3 rflct = reflect(normalize(pc - lightPos), nc);
@@ -136,51 +167,17 @@ float4 mainImage(float2 fragCoord, float3 faceNormal)
 	return fragColor;
 }
 
-//==============================================================================
-// Interstage structures
-//==============================================================================
-struct VertexIn
-{
-	float3 Position : POSITION0;
-    float2 TexCoord : TEXCOORD0;
-    float3 Normal : NORMAL0;
-};
-
-struct VertexOut
-{
-	float4 Position : SV_POSITION;
-    float2 TexCoord : TEXCOORD0;
-    float3 Normal : NORMAL0;
-};
-
-//==============================================================================
-// Vertex shader
-//==============================================================================
-
-VertexOut VS(in VertexIn input)
-{
-	VertexOut vout = (VertexOut)0;
-
-	vout.Position = mul(float4(input.Position, 1.0f), WorldViewProjection);		
-	vout.TexCoord = input.TexCoord;
-    vout.Normal = input.Normal;
-
-	return vout;
-}
-
-//==============================================================================
-// Pixel shader
-//==============================================================================
-
 float4 PS(VertexOut input) : SV_TARGET
 {
 	float4 baseColor = mainImage(input.TexCoord, input.Normal);
 	return baseColor;
 }
 
+
 //==============================================================================
 // Techniques
 //==============================================================================
+
 technique Technique0
 {
 	pass P0

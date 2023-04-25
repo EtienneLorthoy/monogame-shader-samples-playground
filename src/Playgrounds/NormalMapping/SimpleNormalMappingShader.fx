@@ -12,24 +12,12 @@
 // Global parameters
 //==============================================================================
 
-// Helper parameters used in shadertoy shaders
-// uniform vec3 iResolution;
-// uniform float iTime;
-// uniform float iTimeDelta;
-// uniform float iFrame;
-// uniform float iChannelTime[4];
-// uniform vec4 iMouse;
-// uniform vec4 iDate;
-// uniform float iSampleRate;
-// uniform vec3 iChannelResolution[4];
-// uniform samplerXX iChanneli;
+uniform float4x4 World;
+uniform float4x4 WorldViewProjection;
+uniform float3 CameraPosition;
 
-float4x4 World;
-float4x4 WorldViewProjection;
-float3 CameraPosition;
-
-texture2D ColorMap;
-sampler2D ColorMapSampler = sampler_state
+uniform texture2D ColorMap;
+uniform sampler2D ColorMapSampler = sampler_state
 {
     Texture = <ColorMap>;
     MinFilter = linear;
@@ -37,8 +25,8 @@ sampler2D ColorMapSampler = sampler_state
     MipFilter = linear;
 };
  
-texture2D NormalMap;
-sampler2D NormalMapSampler = sampler_state
+uniform texture2D NormalMap;
+uniform sampler2D NormalMapSampler = sampler_state
 {
     Texture = <NormalMap>;
     MinFilter = linear;
@@ -46,9 +34,11 @@ sampler2D NormalMapSampler = sampler_state
     MipFilter = linear;
 };
 
+
 //==============================================================================
 // Interstage structures
 //==============================================================================
+
 struct VertexIn
 {
 	float3 Position : POSITION;
@@ -89,6 +79,7 @@ VertexOut VS(VertexIn input)
 	return vout;
 }
 
+
 //==============================================================================
 // Pixel shader
 //==============================================================================
@@ -126,6 +117,7 @@ float4 PS(VertexOut input) : SV_TARGET
 
 	return result;
 }
+
 
 //==============================================================================
 // Techniques

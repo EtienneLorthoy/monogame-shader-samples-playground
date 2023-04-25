@@ -7,9 +7,37 @@
 	#define PS_SHADERMODEL ps_4_0
 #endif
 
+
 //==============================================================================
+// Global parameters
+//==============================================================================
+
+float4x4 WorldViewProjection;
+float3 CameraPosition;
+
+
+//==============================================================================
+// Interstage structures
+//==============================================================================
+
+struct VertexIn
+{
+	float3 Position : POSITION;
+    float2 TexCoord : TEXCOORD0;
+};
+
+struct VertexOut
+{
+	float4 Position : SV_POSITION;
+    float2 TexCoord : TEXCOORD0;
+};
+
+
+//==============================================================================
+// Pixel shader
+//==============================================================================
+
 // ShaderToy Export shader 
-//==============================================================================
 /*
 	Rounded Voronoi Borders
 	-----------------------
@@ -146,27 +174,16 @@ float4 renderPointTexture(float2 fragCoord)
 	return float4(sqrt(clamp(col, 0., 1.)), 1);
 }
 
-//==============================================================================
-// Global parameters
-//==============================================================================
-
-float4x4 WorldViewProjection;
-float3 CameraPosition;
-
-//==============================================================================
-// Interstage structures
-//==============================================================================
-struct VertexIn
+float4 PS(VertexOut input) : SV_TARGET
 {
-	float3 Position : POSITION;
-    float2 TexCoord : TEXCOORD0;
-};
+	// We just use the texture coordinates but with the internal rendering resolution.
+	// We could remove the *800f and the iResolution variable and just use the texture coordinates
+	// But I wanted to show with little to no modifications with the original shader.
+	float4 baseColor = renderPointTexture(input.TexCoord*800.0f);
+ 
+	return baseColor;
+}
 
-struct VertexOut
-{
-	float4 Position : SV_POSITION;
-    float2 TexCoord : TEXCOORD0;
-};
 
 //==============================================================================
 // Vertex shader
@@ -182,19 +199,6 @@ VertexOut VS(VertexIn input)
 	return vout;
 }
 
-//==============================================================================
-// Pixel shader
-//==============================================================================
-
-float4 PS(VertexOut input) : SV_TARGET
-{
-	// We just use the texture coordinates but with the internal rendering resolution.
-	// We could remove the *800f and the iResolution variable and just use the texture coordinates
-	// But I wanted to show with little to no modifications with the original shader.
-	float4 baseColor = renderPointTexture(input.TexCoord*800.0f);
- 
-	return baseColor;
-}
 
 //==============================================================================
 // Techniques

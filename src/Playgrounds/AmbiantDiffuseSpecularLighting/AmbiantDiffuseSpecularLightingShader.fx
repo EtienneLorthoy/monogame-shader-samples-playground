@@ -7,12 +7,14 @@
 	#define PS_SHADERMODEL ps_4_0
 #endif
 
+
 //==============================================================================
 // Global parameters
 //==============================================================================
 
-float4x4 WorldViewProjection;
-float3 CameraPosition;
+uniform float4x4 WorldViewProjection;
+uniform float3 CameraPosition;
+
 
 //==============================================================================
 // Interstage structures
@@ -30,6 +32,7 @@ struct VertexOut
 	float3 View : NORMAL2;
 };
 
+
 //==============================================================================
 // Vertex shader
 //==============================================================================
@@ -44,6 +47,7 @@ VertexOut VS(VertexIn input)
 
 	return vout;
 }
+
 
 //==============================================================================
 // Pixel shader
@@ -74,6 +78,7 @@ float4 PS(VertexOut input) : SV_TARGET
  
 	return result;
 }
+
 
 //==============================================================================
 // Techniques

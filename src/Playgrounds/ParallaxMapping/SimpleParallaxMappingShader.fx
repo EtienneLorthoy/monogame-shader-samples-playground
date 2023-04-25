@@ -7,16 +7,17 @@
 	#define PS_SHADERMODEL ps_4_0
 #endif
 
+
 //==============================================================================
 // Global parameters
 //==============================================================================
 
-float4x4 World;
-float4x4 WorldViewProjection;
-float3 CameraPosition;
+uniform float4x4 World;
+uniform float4x4 WorldViewProjection;
+uniform float3 CameraPosition;
 
-texture2D ColorMap;
-sampler2D ColorMapSampler = sampler_state
+uniform texture2D ColorMap;
+uniform sampler2D ColorMapSampler = sampler_state
 {
     Texture = <ColorMap>;
     MinFilter = linear;
@@ -24,8 +25,8 @@ sampler2D ColorMapSampler = sampler_state
     MipFilter = linear;
 };
  
-texture2D NormalMap;
-sampler2D NormalMapSampler = sampler_state
+uniform texture2D NormalMap;
+uniform sampler2D NormalMapSampler = sampler_state
 {
     Texture = <NormalMap>;
     MinFilter = linear;
@@ -33,8 +34,8 @@ sampler2D NormalMapSampler = sampler_state
     MipFilter = linear;
 };
  
-texture2D HeightMap;
-sampler2D HeightMapSampler = sampler_state
+uniform texture2D HeightMap;
+uniform sampler2D HeightMapSampler = sampler_state
 {
     Texture = <HeightMap>;
     MinFilter = linear;
@@ -42,9 +43,11 @@ sampler2D HeightMapSampler = sampler_state
     MipFilter = linear;
 };
 
+
 //==============================================================================
 // Interstage structures
 //==============================================================================
+
 struct VertexIn
 {
 	float3 Position : POSITION;
@@ -86,6 +89,7 @@ VertexOut VS(VertexIn input)
 
 	return vout;
 }
+
 
 //==============================================================================
 // Pixel shader
@@ -177,6 +181,7 @@ float4 PS(VertexOut input) : SV_TARGET
  
 	return result;
 }
+
 
 //==============================================================================
 // Techniques

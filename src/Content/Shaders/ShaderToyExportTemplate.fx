@@ -8,12 +8,55 @@
 #endif
 
 ///=============================================================================
+///=============================================================================
 /// Shadertoy shader template to port to HLSL with all usable parameters and such
 ///=============================================================================
+///=============================================================================
+
 
 //==============================================================================
-// ShaderToy export 
+// Global parameters
 //==============================================================================
+
+float4x4 WorldViewProjection;
+
+
+//==============================================================================
+// Interstage structures
+//==============================================================================
+struct VertexIn
+{
+	float3 Position : POSITION0;
+    float2 TexCoord : TEXCOORD0;
+};
+
+struct VertexOut
+{
+	float4 Position : SV_POSITION;
+    float2 TexCoord : TEXCOORD0;
+};
+
+
+//==============================================================================
+// Vertex shader
+//==============================================================================
+
+VertexOut VS(in VertexIn input)
+{
+	VertexOut vout = (VertexOut)0;
+
+	vout.Position = mul(float4(input.Position, 1.0f), WorldViewProjection);		
+	vout.TexCoord = input.TexCoord;
+
+	return vout;
+}
+
+
+//==============================================================================
+// Pixel shader
+//==============================================================================
+
+// Put here the mainImage function from shadertoy
 
 // Helper parameters used in shadertoy shaders
 // uniform vec3 iResolution;
@@ -46,45 +89,6 @@ float4 mainImage(float2 fragCoord)
 
 	return float4(0.0, 1.0, 0.0, 1.0);
 }
-
-//==============================================================================
-// Global parameters
-//==============================================================================
-
-float4x4 WorldViewProjection;
-
-//==============================================================================
-// Interstage structures
-//==============================================================================
-struct VertexIn
-{
-	float3 Position : POSITION0;
-    float2 TexCoord : TEXCOORD0;
-};
-
-struct VertexOut
-{
-	float4 Position : SV_POSITION;
-    float2 TexCoord : TEXCOORD0;
-};
-
-//==============================================================================
-// Vertex shader
-//==============================================================================
-
-VertexOut VS(in VertexIn input)
-{
-	VertexOut vout = (VertexOut)0;
-
-	vout.Position = mul(float4(input.Position, 1.0f), WorldViewProjection);		
-	vout.TexCoord = input.TexCoord;
-
-	return vout;
-}
-
-//==============================================================================
-// Pixel shader
-//==============================================================================
 
 float4 PS(VertexOut input) : SV_TARGET
 {

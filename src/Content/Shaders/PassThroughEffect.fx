@@ -1,6 +1,7 @@
 ﻿//==============================================================================
-// Vertex shader
+// Interstage structures
 //==============================================================================
+
 struct VertexIn
 {
 	float3 Position : POSITION0;
@@ -11,15 +12,6 @@ struct VertexOut
 	float4 Position : SV_POSITION;
 };
 
-VertexOut VS(in VertexIn input)
-{
-	VertexOut output;
-	
-    output.Position = float4(input.Position, 1);
-	
-	return output;
-}
-
 //==============================================================================
 // Pixel shader 
 //==============================================================================
@@ -29,9 +21,20 @@ float4 PS(VertexOut input) : SV_TARGET
 }
 
 //==============================================================================
+// Vertex shader
+//==============================================================================
+
+VertexOut VS(in VertexIn input)
+{
+	VertexOut output;
+    output.Position = float4(input.Position, 1);
+	return output;
+}
+
+//==============================================================================
 // Techniques
 //==============================================================================
-technique Tech0
+technique Technique0
 {
 	pass P0
 	{

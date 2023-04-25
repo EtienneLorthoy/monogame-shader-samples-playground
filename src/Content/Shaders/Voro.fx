@@ -11,19 +11,8 @@
 // Global parameters
 //==============================================================================
 
-// Helper parameters used in shadertoy shaders
-// uniform vec3 iResolution;
-// uniform float iTime;
-// uniform float iTimeDelta;
-// uniform float iFrame;
-// uniform float iChannelTime[4];
-// uniform vec4 iMouse;
-// uniform vec4 iDate;
-// uniform float iSampleRate;
-// uniform vec3 iChannelResolution[4];
-// uniform samplerXX iChanneli;
+uniform float4x4 WorldViewProjection;
 
-float4x4 WorldViewProjection;
 
 //==============================================================================
 // Interstage structures
@@ -39,6 +28,7 @@ struct VertexOut
     float3 TexCoord : TEXCOORD0;
 };
 
+
 //==============================================================================
 // Vertex shader
 //==============================================================================
@@ -52,6 +42,7 @@ VertexOut VS(in VertexIn input)
 	
     return output;
 }
+
 
 //==============================================================================
 // Pixel shader 
@@ -212,6 +203,7 @@ float4 PS(VertexOut input) : SV_TARGET
 	float4 color = Test(pos);
 	return color;
 }
+
 
 //==============================================================================
 // Techniques

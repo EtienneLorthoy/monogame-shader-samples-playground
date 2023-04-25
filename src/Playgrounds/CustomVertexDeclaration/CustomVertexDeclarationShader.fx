@@ -16,8 +16,8 @@ uniform float4x4 World;
 uniform float4x4 WorldViewProjection;
 uniform float3 CameraPosition;
 
-texture2D ColorMap;
-sampler2D ColorMapSampler = sampler_state
+uniform texture2D ColorMap;
+uniform sampler2D ColorMapSampler = sampler_state
 {
     Texture = <ColorMap>;
     MinFilter = linear;
@@ -25,8 +25,8 @@ sampler2D ColorMapSampler = sampler_state
     MipFilter = linear;
 };
  
-texture2D NormalMap;
-sampler2D NormalMapSampler = sampler_state
+uniform texture2D NormalMap;
+uniform sampler2D NormalMapSampler = sampler_state
 {
     Texture = <NormalMap>;
     MinFilter = linear;
@@ -34,9 +34,11 @@ sampler2D NormalMapSampler = sampler_state
     MipFilter = linear;
 };
 
+
 //==============================================================================
 // Interstage structures
 //==============================================================================
+
 struct VertexIn
 {
 	float3 Position : POSITION;
@@ -54,6 +56,7 @@ struct VertexOut
     float3x3 WorldToTangentSpace : TEXCOORD2;
 	float3 Normal: NORMAL;
 };
+
 
 //==============================================================================
 // Vertex shader
@@ -76,6 +79,7 @@ VertexOut VS(VertexIn input)
 
 	return vout;
 }
+
 
 //==============================================================================
 // Pixel shader
@@ -114,6 +118,7 @@ float4 PS(VertexOut input) : SV_TARGET
 
 	return result;
 }
+
 
 //==============================================================================
 // Techniques
