@@ -43,11 +43,11 @@
 /processorParam:DebugMode=Auto
 /build:../Playgrounds/RenderToTexture/VoroShader.fx;VoroShader.fx
 
-#begin ../Playgrounds/ShadertoyExport3DProjected/VoroShaderProjected.fx
+#begin ../Playgrounds/ShadertoyCubeProjected/VoroShaderProjected.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:../Playgrounds/ShadertoyExport3DProjected/VoroShaderProjected.fx;Shaders/VoroShaderProjected.fx
+/build:../Playgrounds/ShadertoyCubeProjected/VoroShaderProjected.fx;Shaders/VoroShaderProjected.fx
 
 #begin ../Playgrounds/ShadertoyExports/HologramIridiscenceRayMarching/HologramIridiscenceRayMarchingShader.fx
 /importer:EffectImporter
@@ -194,6 +194,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/BareMetal/roughness.jpg
+
+#begin Textures/iridescence.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/iridescence.png
 
 #begin Textures/MetalPanel/ambientOcclusion.jpg
 /importer:TextureImporter

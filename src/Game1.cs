@@ -44,7 +44,7 @@ namespace MonogameShaderPlayground
             // Shadertoy exports
             playgrounds.Add(new RaymarchingShaderBlock(this, Camera));
             playgrounds.Add(new VoroShaderBlock(this, Camera));
-            playgrounds.Add(new ShadertoyExport3DProjected(this, Camera));
+            playgrounds.Add(new ShadertoyCubeProjectedPlayground(this, Camera));
             playgrounds.Add(new HologramIridiscenceRayMarchingPlayground(this, Camera));
 
             // Rendering to texture techniques

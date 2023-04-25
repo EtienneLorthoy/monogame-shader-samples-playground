@@ -5,13 +5,13 @@ using MonogameShaderPlayground.Helpers;
 
 namespace MonogameShaderPlayground.Primitives
 {
-    public class ShadertoyExport3DProjected : DrawableGameComponent
+    public class ShadertoyCubeProjectedPlayground : DrawableGameComponent
     {
         private VertexPositionTexture[] meshVertices;
         private BasicCamera camera;
         private Effect effect;
 
-        public ShadertoyExport3DProjected(Game game, BasicCamera camera) : base(game)
+        public ShadertoyCubeProjectedPlayground(Game game, BasicCamera camera) : base(game)
         {
             this.camera = camera;
         }

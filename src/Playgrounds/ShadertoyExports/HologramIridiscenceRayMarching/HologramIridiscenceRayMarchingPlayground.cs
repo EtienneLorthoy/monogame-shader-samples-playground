@@ -15,11 +15,8 @@ namespace MonogameShaderPlayground.Primitives
         private BasicCamera camera;
 
         private SpriteBatch spriteBatch;
-        private int screenWidth;
-        private int screenHeight;
 
         private Effect effect;
-        private Texture2D texture;
 
         private HotReloadShaderManager hotReloadShaderManager;
 
@@ -36,17 +33,7 @@ namespace MonogameShaderPlayground.Primitives
             {
                 effect = hotReloadShaderManager.Load("Shaders/HologramIridiscenceRayMarchingShader");
                 // effect = Game.Content.Load<Effect>("Shaders/HologramIridiscenceRayMarchingShader");
-                
-                screenWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
-                screenHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;
-                Vector2 screenResolution = new Vector2(screenWidth, screenHeight);
-                effect.Parameters["iResolution"].SetValue(screenResolution);
-            }
-
-            if (texture == null)
-            {
-                texture = Game.Content.Load<Texture2D>("Shaders/RaymarchingTexture");
-                effect.Parameters["iChannel0"].SetValue(texture);
+                effect.Parameters["iChannel0"]?.SetValue( Game.Content.Load<Texture2D>("Textures/iridescence"));
             }
 
             meshVertices = VertexsBuilderHelper.ConstructVertexPositionTextureCube(new Vector3(-0.5f, -0.5f, -0.5f), 1f);
@@ -59,13 +46,12 @@ namespace MonogameShaderPlayground.Primitives
             if (hotReloadShaderManager.CheckForChanges())
             {
                 effect = hotReloadShaderManager.Load("Shaders/HologramIridiscenceRayMarchingShader");
+                effect.Parameters["iChannel0"]?.SetValue( Game.Content.Load<Texture2D>("Textures/iridescence"));
             }
 
             effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.Projection);
-            effect.Parameters["iTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
-
-            Vector2 mousePosition = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
-            effect.Parameters["iMouse"].SetValue(mousePosition);
+            effect.Parameters["iTime"]?.SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+            effect.Parameters["CameraPosition"]?.SetValue(camera.Position);
 
             base.Update(gameTime);
         }
