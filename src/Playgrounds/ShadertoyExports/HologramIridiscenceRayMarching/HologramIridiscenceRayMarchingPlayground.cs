@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using MonogameShaderPlayground.Helpers;
 
 namespace MonogameShaderPlayground.Primitives
@@ -10,7 +9,7 @@ namespace MonogameShaderPlayground.Primitives
     /// </summary>
     public class HologramIridiscenceRayMarchingPlayground : DrawableGameComponent
     {
-        private VertexPositionTexture[] meshVertices;
+        private VertexPositionNormalTexture[] meshVertices;
         private BasicCamera camera;
 
         private SpriteBatch spriteBatch;
@@ -35,7 +34,7 @@ namespace MonogameShaderPlayground.Primitives
                 effect.Parameters["iChannel0"]?.SetValue( Game.Content.Load<Texture2D>("Textures/iridescence"));
             }
 
-            meshVertices = VertexsBuilderHelper.ConstructVertexPositionTextureCube(new Vector3(-0.5f, -0.5f, -0.5f), 1f);
+            meshVertices = VertexsBuilderHelper.ConstructVertexPositionNormalTextureCube(new Vector3(-0.5f, -0.5f, -0.5f), 1f);
 
             spriteBatch = new SpriteBatch(GraphicsDevice);
         }

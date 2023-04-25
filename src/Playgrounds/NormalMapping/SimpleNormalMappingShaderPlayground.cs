@@ -15,7 +15,7 @@ namespace MonogameShaderPlayground.Primitives
 
         private Effect effect;
 
-            private Texture2D baseColorTexture;
+        private Texture2D baseColorTexture;
         private Texture2D normalMapTexture;
         private Texture2D heightMapTexture;
 

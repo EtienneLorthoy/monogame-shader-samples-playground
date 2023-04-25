@@ -30,9 +30,10 @@ SamplerState samplerState
 };
 
 const float iridStrength = 0.5;
-const float iridSaturation = 0.8;
+const float iridSaturation = 0.9;
 const float fresnelStrength = 1.5;
-const float3 lightCol = float3(.02, .7, .02);
+//const float3 lightCol = float3(.02, .7, .02);
+const float3 lightCol = float3(.2, .7, .2);
 
 const int iter = 1;
 const float far = 1000.;
@@ -69,7 +70,7 @@ float3 greyScale(float3 color, float lerpVal) {
     return newColor;
 }
 
-float4 mainImage(float2 fragCoord)
+float4 mainImage(float2 fragCoord, float3 faceNormal)
 {
     float2 uv = fragCoord;
     uv -= float2(0.5, 0.5);
@@ -123,7 +124,9 @@ float4 mainImage(float2 fragCoord)
 
     float4 greyTex = float4(greyScale(tex.rgb, 1.), 1.);
 
-    float fres = 1. - dot(nc, normalize(CameraPosition * 10.0 - pc));
+    float3 pcWorld = CameraPosition + rayDir * depth;
+    float3 ncWorld = normalize(normalBox(pcWorld, box));
+    float fres =  dot(ncWorld, normalize(CameraPosition) - normalize(faceNormal));
     fres *= fresnelStrength;
     float4 irid = pal((c)+(fres * greyTex)) ; //iridescence
     float3 col = ((.4 + .3* ldc + pow(spec, 2.) * 0.3) * lightCol) * .3 * c;
@@ -140,12 +143,14 @@ struct VertexIn
 {
 	float3 Position : POSITION0;
     float2 TexCoord : TEXCOORD0;
+    float3 Normal : NORMAL0;
 };
 
 struct VertexOut
 {
 	float4 Position : SV_POSITION;
     float2 TexCoord : TEXCOORD0;
+    float3 Normal : NORMAL0;
 };
 
 //==============================================================================
@@ -158,6 +163,7 @@ VertexOut VS(in VertexIn input)
 
 	vout.Position = mul(float4(input.Position, 1.0f), WorldViewProjection);		
 	vout.TexCoord = input.TexCoord;
+    vout.Normal = input.Normal;
 
 	return vout;
 }
@@ -168,7 +174,7 @@ VertexOut VS(in VertexIn input)
 
 float4 PS(VertexOut input) : SV_TARGET
 {
-	float4 baseColor = mainImage(input.TexCoord);
+	float4 baseColor = mainImage(input.TexCoord, input.Normal);
 	return baseColor;
 }
 

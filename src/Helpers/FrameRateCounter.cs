@@ -37,6 +37,7 @@ namespace MonogameShaderPlayground.Helpers
 
         public override void Draw(GameTime gameTime)
         {
+            this.DrawOrder = 1;
             frameCounter++;
 
             string fps = string.Format("fps: {0}", frameRate);
