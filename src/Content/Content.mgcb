@@ -25,6 +25,12 @@
 /processorParam:DebugMode=Auto
 /build:../Playgrounds/AmbiantDiffuseSpecularLighting/AmbiantDiffuseSpecularLightingShader.fx;Shaders/AmbiantDiffuseSpecularLightingShader.fx
 
+#begin ../Playgrounds/CustomVertexDeclaration/CustomVertexDeclarationShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../Playgrounds/CustomVertexDeclaration/CustomVertexDeclarationShader.fx;Shaders/CustomVertexDeclarationShader.fx
+
 #begin ../Playgrounds/NormalMapping/SimpleNormalMappingShader.fx
 /importer:EffectImporter
 /processor:EffectProcessor

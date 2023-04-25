@@ -57,6 +57,9 @@ namespace MonogameShaderPlayground
             playgrounds.Add(new SimpleNormalMappingShaderPlayground(this, Camera));
             playgrounds.Add(new SimpleParallaxMappingShaderPlayground(this, Camera));
 
+            // Monogame or C# interop specific techniques
+            playgrounds.Add(new CustomVertexDeclarationPlayground(this, Camera));
+
             // Starting playground
             var startingIndex = 3;
             this.label.Text = playgrounds[startingIndex].GetType().Name + " - SPACE: switch playgrounds, R: auto-rotate";

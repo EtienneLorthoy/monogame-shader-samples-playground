@@ -30,8 +30,8 @@ SamplerState samplerState
 };
 
 const float iridStrength = 0.5;
-const float iridSaturation = 0.7;
-const float fresnelStrength = 3.;
+const float iridSaturation = 0.8;
+const float fresnelStrength = 1.5;
 const float3 lightCol = float3(.02, .7, .02);
 
 const int iter = 1;
@@ -49,17 +49,6 @@ float sdBox( float3 p, float3 b )
 {
   float3 d = abs(p) - b;
   return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
-}
-
-float sdBoxR(float3 p, float3 b) {
-    return sdBox(p, b);
-}
-
-float3 normalBoxR(float3 p, float3 b) {
-     float dx = sdBoxR(float3(p.x + EPSILON, p.y, p.z), b) - sdBoxR(float3(p.x - EPSILON, p.y, p.z), b);
-    float dy = sdBoxR(float3(p.x, p.y + EPSILON, p.z), b) - sdBoxR(float3(p.x, p.y - EPSILON, p.z), b);
-    float dz = sdBoxR(float3(p.x, p.y, p.z + EPSILON), b) - sdBoxR(float3(p.x, p.y, p.z - EPSILON), b);
-    return float3(dx, dy, dz);
 }
 
 float3 normalBox(float3 p, float3 b) {
@@ -93,24 +82,12 @@ float4 mainImage(float2 fragCoord)
     float3 box = float3(1.0 , 1.0, 1.0);
     
     float depth = 0.;
-   
-    for(int i=0;i<iter;i++) {
-        float3 tpc = camPos + rayDir * depth;
-        tpc = mul(tpc,ROT);
-        float distc = sdBox(tpc, box);
-        if(distc < EPSILON){
-            break;
-        }        
-        if(depth > far) {            
-            break;
-        }
-        depth+=distc;
-    }
+    float3 tpc = camPos + rayDir * depth;
+    depth += sdBox(tpc, box);
     
     float3 pc = camPos + rayDir * depth;
     float c = sdBox(pc, box);
     float3 nc = normalize(normalBox(pc, box));
-    float3 nco = normalize(normalBoxR(pc, box)); //normal for calculating fresnel
   	c = smoothstep(1.,.07, c);
 
   	float3 up; 
@@ -146,7 +123,7 @@ float4 mainImage(float2 fragCoord)
 
     float4 greyTex = float4(greyScale(tex.rgb, 1.), 1.);
 
-    float fres = 1. - dot(nco, normalize(CameraPosition * 10.0 - pc));
+    float fres = 1. - dot(nc, normalize(CameraPosition * 10.0 - pc));
     fres *= fresnelStrength;
     float4 irid = pal((c)+(fres * greyTex)) ; //iridescence
     float3 col = ((.4 + .3* ldc + pow(spec, 2.) * 0.3) * lightCol) * .3 * c;

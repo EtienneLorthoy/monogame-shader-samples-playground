@@ -25,6 +25,7 @@ namespace MonogameShaderPlayground.Helpers
 
         public override void Draw(GameTime gameTime)
         {
+            this.DrawOrder = 1;
             spriteBatch.Begin();
 
             spriteBatch.DrawString(spriteFont, Text, new Vector2(33, 60), Color.Red);
