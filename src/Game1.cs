@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonogameShaderPlayground.Helpers;
+using MonogameShaderPlayground.Playgrounds.ShadertoyExports.HologramIridescenceRayMarching;
 using MonogameShaderPlayground.Primitives;
 
 namespace MonogameShaderPlayground
@@ -44,7 +45,7 @@ namespace MonogameShaderPlayground
             playgrounds.Add(new RaymarchingShaderBlock(this, Camera));
             playgrounds.Add(new VoroShaderBlock(this, Camera));
             playgrounds.Add(new ShadertoyCubeProjectedPlayground(this, Camera));
-            playgrounds.Add(new HologramIridiscenceRayMarchingPlayground(this, Camera));
+            playgrounds.Add(new HologramIridescenceRayMarchingPlayground(this, Camera));
 
             // Rendering to texture techniques
             playgrounds.Add(new RenderToTexturePlayground(this, Camera));

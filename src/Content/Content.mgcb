@@ -55,11 +55,11 @@
 /processorParam:DebugMode=Auto
 /build:../Playgrounds/ShadertoyCubeProjected/VoroShaderProjected.fx;Shaders/VoroShaderProjected.fx
 
-#begin ../Playgrounds/ShadertoyExports/HologramIridiscenceRayMarching/HologramIridiscenceRayMarchingShader.fx
+#begin ../Playgrounds/ShadertoyExports/HologramIridescenceRayMarching/HologramIridescenceRayMarchingShader.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:../Playgrounds/ShadertoyExports/HologramIridiscenceRayMarching/HologramIridiscenceRayMarchingShader.fx;Shaders/HologramIridiscenceRayMarchingShader.fx
+/build:../Playgrounds/ShadertoyExports/HologramIridescenceRayMarching/HologramIridescenceRayMarchingShader.fx;Shaders/HologramIridescenceRayMarchingShader.fx
 
 #begin Fonts/Font.spritefont
 /importer:FontDescriptionImporter
