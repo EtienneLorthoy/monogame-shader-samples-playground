@@ -146,7 +146,7 @@ float4 mainImage(float2 fragCoord)
 
     float4 greyTex = float4(greyScale(tex.rgb, 1.), 1.);
 
-    float fres = 1. - dot(nco, normalize(CameraPosition - pc));
+    float fres = 1. - dot(nco, normalize(CameraPosition * 10.0 - pc));
     fres *= fresnelStrength;
     float4 irid = pal((c)+(fres * greyTex)) ; //iridescence
     float3 col = ((.4 + .3* ldc + pow(spec, 2.) * 0.3) * lightCol) * .3 * c;
