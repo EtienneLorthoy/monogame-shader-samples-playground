@@ -18,9 +18,16 @@
 
 ## Description
 
-All is in the title, this repos is for having handy and ready to use HLSL Shaders to be directly used in a Monogame project. Target Monogame version : 3.8.1.303
+All is in the title, this repos is for having handy and ready to use HLSL Shaders with their C# code to be directly used in a Monogame project. Actual target Monogame version : 3.8.1.303.
 
-The aim here is being able to copy/past an entire playground class, and past it in a Monogame project and have it working with little to no modification. So you can prototype quickly some nice or specific rendering method.
+Each rendering demo is a **Playground**. Playgrounds:
+- Aim at having all the needed code to run with a copy/past of its folder in a blank Monogame project and have it working with little to no modification. 
+- Aim to be minimal straight-to-the-point code to achieve the rendering, regardless of platform support, edge cases, optimisation or configurability.
+- Are using a shader .fx file in its own folder but expect to be loaded from "Shaders/shader_filename" by the Monogame ContentManager. So MCGB-Editor is using linked file (aka the .fx file are outside the usual "Content" folder).
+- Will depend on the BasicCamera for the usual needed View/World/Projection matrices.
+- Are placed in the folder _Playgrounds_, then one folder per Playground.
+
+All this is a tool for me so that I can prototype/test quickly some nice or specific rendering method in my Monogame projects. Hope it helps someone else!
 
 ## How To Use
 
