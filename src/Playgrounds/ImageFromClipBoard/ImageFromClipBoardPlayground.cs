@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonogameShaderPlayground.Cameras;
 using MonogameShaderPlayground.Helpers;
 using System.Drawing;
 using System.Windows.Forms;

@@ -5,6 +5,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MonogameShaderPlayground.Helpers
 {
+    /// <summary>
+    /// This class is used to generate vertices for a spheres or cubes. It provides basic primitives to allow 
+    /// each playgrounds to focus on the rendering code. In a real 3D app, you would probably use 3D models or something.
+    /// NOTE: This class provide Vertices for Monogame builtin IVertexType ONLY (like VertexPositionColorNormal). If a playground
+    /// requires a custom IVertexType, it will have its own VerticesBuilderHelper class for its custom IVertexType.
+    /// See CustomVertexDeclarationPlayground for an example of a playground that requires a custom IVertexType.
+    /// </summary>
     public static class VertexsBuilderHelper
     {
         public static Tuple<VertexPositionColorNormal[], int[]> GenerateSphereVertices(float diameter, int tessellation)

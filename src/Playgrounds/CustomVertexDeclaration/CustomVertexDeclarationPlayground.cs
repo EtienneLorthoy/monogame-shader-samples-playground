@@ -1,8 +1,8 @@
-using MonogameShaderPlayground.Cameras;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Linq;
 using System;
+using MonogameShaderPlayground.Helpers;
 
 namespace MonogameShaderPlayground.Primitives
 {

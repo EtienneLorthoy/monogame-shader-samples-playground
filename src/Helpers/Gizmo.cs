@@ -1,8 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace MonogameShaderPlayground.Primitives
+namespace MonogameShaderPlayground.Helpers
 {
+    /// <summary>
+    /// Draws a simple gizmo with the X, Y and Z axis. to help figure out where the camera is looking.
+    /// Quite useful when you are trying to figure out why your shaders/meshes aren't looking how/where you think they should.
+    /// </summary>
     public class Gizmo : DrawableGameComponent
     {
         VertexPositionColor[] vertices;
@@ -30,7 +34,7 @@ namespace MonogameShaderPlayground.Primitives
             vertices[5] = new VertexPositionColor(new Vector3(0, 0, 1000), Color.Blue);
 
             // Vertex Buffer
-            buffer = new VertexBuffer(this.Game.GraphicsDevice, VertexPositionColor.VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
+            buffer = new VertexBuffer(Game.GraphicsDevice, VertexPositionColor.VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
             buffer.SetData(vertices);
 
             // Shader
@@ -55,8 +59,8 @@ namespace MonogameShaderPlayground.Primitives
             foreach (var pass in effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                this.Game.GraphicsDevice.SetVertexBuffer(buffer);
-                this.Game.GraphicsDevice.DrawPrimitives(PrimitiveType.LineList, 0, vertices.Length / 2);
+                Game.GraphicsDevice.SetVertexBuffer(buffer);
+                Game.GraphicsDevice.DrawPrimitives(PrimitiveType.LineList, 0, vertices.Length / 2);
             }
 
             base.Draw(gameTime);

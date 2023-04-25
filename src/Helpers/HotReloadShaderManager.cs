@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,7 +9,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MonogameShaderPlayground.Helpers
 {
-    #if DEBUG
+    /// <summary>
+    /// Hot reload shader manager! It will reload the shader if the source shader file is changed.
+    /// Tremendously useful for shader development as you don't have to restart the game every time you change the shader.
+    /// It will also show the compilation errors in the game window if any (while keeping the render from previous shader)
+    /// </summary>
     public class HotReloadShaderManager
     {
         private static readonly string BinPath = System.Reflection
@@ -153,5 +156,4 @@ namespace MonogameShaderPlayground.Helpers
             return Shader;
         }
     }
-    #endif
 }

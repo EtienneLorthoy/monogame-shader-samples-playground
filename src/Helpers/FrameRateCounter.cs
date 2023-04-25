@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -14,11 +13,7 @@ namespace MonogameShaderPlayground.Helpers
         int frameCounter = 0;
         TimeSpan elapsedTime = TimeSpan.Zero;
 
-        public FrameRateCounter(Game game)
-            : base(game)
-        {
-
-        }
+        public FrameRateCounter(Game game) : base(game) { }
 
         protected override void LoadContent()
         {

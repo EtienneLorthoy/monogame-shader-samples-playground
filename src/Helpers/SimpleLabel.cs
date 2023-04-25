@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MonogameShaderPlayground.Helpers
 {
+    /// <summary>
+    /// Simple label that can be used to display text on the screen with word wrapping support.
+    /// It might not be the most efficient way to do it, but it's simple and it works. 
+    /// You can use WriteLine() to let it manage the word wrapping, or simply write directly to the Text property.
+    /// </summary>
     public class SimpleLabel : DrawableGameComponent
     {
         public string Text = "";
