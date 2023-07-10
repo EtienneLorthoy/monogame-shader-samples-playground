@@ -53,7 +53,6 @@ namespace MonogameShaderPlayground.Primitives
             foreach (var pass in effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                // GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, cubeVertexBuffer.VertexCount / 3);
                 GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, meshVertices, 0, meshVertices.Length / 3);
             }
         }

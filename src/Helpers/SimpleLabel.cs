@@ -17,8 +17,12 @@ namespace MonogameShaderPlayground.Helpers
 
         private SpriteBatch spriteBatch;
         private SpriteFont spriteFont;
+        private Vector2 position;
 
-        public SimpleLabel(Game game) : base(game) { }
+        public SimpleLabel(Game game, Vector2 position) : base(game) 
+        { 
+            this.position = position;
+        }
 
         protected override void LoadContent()
         {
@@ -32,7 +36,7 @@ namespace MonogameShaderPlayground.Helpers
             this.DrawOrder = 1;
             spriteBatch.Begin();
 
-            spriteBatch.DrawString(spriteFont, Text, new Vector2(33, 60), Color.Red);
+            spriteBatch.DrawString(spriteFont, Text, position, Color.Red);
             
             spriteBatch.End();
         }

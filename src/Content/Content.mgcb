@@ -31,6 +31,12 @@
 /processorParam:DebugMode=Auto
 /build:../Playgrounds/CustomVertexDeclaration/CustomVertexDeclarationShader.fx;Shaders/CustomVertexDeclarationShader.fx
 
+#begin ../Playgrounds/HologramIridescence/HologramIridescenceShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../Playgrounds/HologramIridescence/HologramIridescenceShader.fx;Shaders/HologramIridescenceShader.fx
+
 #begin ../Playgrounds/NormalMapping/SimpleNormalMappingShader.fx
 /importer:EffectImporter
 /processor:EffectProcessor
@@ -55,11 +61,17 @@
 /processorParam:DebugMode=Auto
 /build:../Playgrounds/ShadertoyCubeProjected/VoroShaderProjected.fx;Shaders/VoroShaderProjected.fx
 
-#begin ../Playgrounds/HologramIridescenceRayMarching/HologramIridescenceRayMarchingShader.fx
+#begin ../Playgrounds/Raymarching/SimpleRayMarchingShader.fx
 /importer:EffectImporter
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
-/build:../Playgrounds/HologramIridescenceRayMarching/HologramIridescenceRayMarchingShader.fx;Shaders/HologramIridescenceRayMarchingShader.fx
+/build:../Playgrounds/Raymarching/SimpleRayMarchingShader.fx;Shaders/SimpleRayMarchingShader.fx
+
+#begin ../Playgrounds/RaymarchingShadows/RayMarchingShadowsShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../Playgrounds/RaymarchingShadows/RayMarchingShadowsShader.fx;Shaders/RayMarchingShadowsShader.fx
 
 #begin Fonts/Font.spritefont
 /importer:FontDescriptionImporter

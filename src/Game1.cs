@@ -3,7 +3,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonogameShaderPlayground.Helpers;
-using MonogameShaderPlayground.Playgrounds.HologramIridescenceRayMarching;
+using MonogameShaderPlayground.Playgrounds.HologramIridescence;
+using MonogameShaderPlayground.Playgrounds.RayMarching;
+using MonogameShaderPlayground.Playgrounds.RayMarchingShadows;
 using MonogameShaderPlayground.Primitives;
 
 namespace MonogameShaderPlayground
@@ -11,7 +13,8 @@ namespace MonogameShaderPlayground
     public class Game1 : Game
     {
         public BasicCamera Camera;
-        public SimpleLabel label;
+        public SimpleLabel playgroundInfolabel;
+        public SimpleLabel cameraInfolabel;
 
         private GraphicsDeviceManager graphics;
         private KeyboardState lastKeyboardState;
@@ -39,13 +42,19 @@ namespace MonogameShaderPlayground
             graphics.ApplyChanges();
 
             this.Components.Add(Camera);
-            this.label = new SimpleLabel(this);
+
+            // Labels
+            this.playgroundInfolabel = new SimpleLabel(this, new Vector2(33, 60));
+            this.Components.Add(playgroundInfolabel);
+
+            this.cameraInfolabel = new SimpleLabel(this, new Vector2(33, 180));
+            this.Components.Add(cameraInfolabel);
 
             // Shadertoy exports
             playgrounds.Add(new RaymarchingShaderBlock(this, Camera));
             playgrounds.Add(new VoroShaderBlock(this, Camera));
             playgrounds.Add(new ShadertoyCubeProjectedPlayground(this, Camera));
-            playgrounds.Add(new HologramIridescenceRayMarchingPlayground(this, Camera));
+            playgrounds.Add(new HologramIridescenceShaderPlayground(this, Camera));
 
             // Rendering to texture techniques
             playgrounds.Add(new RenderToTexturePlayground(this, Camera));
@@ -57,14 +66,17 @@ namespace MonogameShaderPlayground
             playgrounds.Add(new SimpleNormalMappingShaderPlayground(this, Camera));
             playgrounds.Add(new SimpleParallaxMappingShaderPlayground(this, Camera));
 
+            // Raymarching techniques
+            playgrounds.Add(new SimpleRayMarchingShaderPlayground(this, Camera));
+            playgrounds.Add(new RayMarchingShadowsShaderPlayground(this, Camera));
+
             // Monogame or C# interop specific techniques
             playgrounds.Add(new CustomVertexDeclarationPlayground(this, Camera));
 
             // Starting playground
-            var startingIndex = 3;
-            this.label.Text = playgrounds[startingIndex].GetType().Name + " - SPACE: switch playgrounds, R: auto-rotate";
-            this.Components.Add(label);
+            var startingIndex = 11;
             this.Components.Add(playgrounds[startingIndex]);
+            this.playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[startingIndex].GetType().Name);
 
             // Utils
             this.Components.Add(new Gizmo(this));
@@ -92,13 +104,15 @@ namespace MonogameShaderPlayground
                     if (Components.Contains(playground)) Components.Remove(playground);
                 }
 
+                playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[index].GetType().Name);
                 playgrounds[index].Enabled = true;
-                label.Text = playgrounds[index].GetType().Name;
                 Components.Add(playgrounds[index]);
             }
 
-            lastKeyboardState = keyboardState;
+            cameraInfolabel.Text = $"Camera position (x:{Camera.Position.X:0.0}, y:{Camera.Position.Y:0.0}, z:{Camera.Position.Z:0.0})";
+            cameraInfolabel.Text += $"\nTarget position (x:{Camera.Target.X:0.0}, y:{Camera.Target.Y:0.0}, z:{Camera.Target.Z:0.0})";
 
+            lastKeyboardState = keyboardState;
             base.Update(gameTime);
         }
 
@@ -107,6 +121,11 @@ namespace MonogameShaderPlayground
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             base.Draw(gameTime);
+        }
+
+        private string BuildDebugOutputString(string name)
+        {
+            return name + "\nSPACE: switch playgrounds, \nR: auto-rotate\nCamera: mouse click";
         }
     }
 }

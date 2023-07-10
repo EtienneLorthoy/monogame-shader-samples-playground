@@ -10,7 +10,7 @@ namespace MonogameShaderPlayground.Helpers
     public class BasicCamera : GameComponent
     {
         public ref Matrix ViewMatrix => ref view;
-        public Vector3 Direction { get => Vector3.Forward; }
+        public Vector3 Direction { get => Vector3.Normalize(cameraTarget - cameraPosition); }
         public Matrix Projection { get; protected set; }
         public Vector3 Position { get => cameraPosition; set => cameraPosition = value; }
         public Vector3 Target { get => cameraTarget; set => cameraTarget = value; }
@@ -25,6 +25,7 @@ namespace MonogameShaderPlayground.Helpers
         {
             // Build camera view matrix
             cameraPosition = new Vector3(2, 1, 2);
+            cameraTarget = target;
             cameraUp = up;
 
             Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, Game.Window.ClientBounds.Width / (float)Game.Window.ClientBounds.Height, 1, 1024);
@@ -38,6 +39,12 @@ namespace MonogameShaderPlayground.Helpers
                 cameraPosition.X = (float)(Math.Sin(Mouse.GetState().X / 100f) * 2f);
                 cameraPosition.Z = (float)(Math.Cos(Mouse.GetState().X / 100f) * 2f);
                 cameraPosition.Y = (float)(Math.Cos(Mouse.GetState().Y / 100f) * 2f);
+            }
+            if (Mouse.GetState().LeftButton == ButtonState.Pressed && Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+            {
+                cameraTarget.X = (float)(Math.Sin(Mouse.GetState().X / 100f) * 1f);
+                cameraTarget.Z = (float)(Math.Cos(Mouse.GetState().X / 100f) * 1f);
+                cameraTarget.Y = (float)(Math.Sin(Mouse.GetState().Y / 100f) + 1f) * 2;
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.R))
             {

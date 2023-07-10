@@ -2,12 +2,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonogameShaderPlayground.Helpers;
 
-namespace MonogameShaderPlayground.Playgrounds.HologramIridescenceRayMarching
+namespace MonogameShaderPlayground.Playgrounds.HologramIridescence
 {
     /// <summary>
     /// Based on https://www.shadertoy.com/view/XlcBR7
     /// </summary>
-    public class HologramIridescenceRayMarchingPlayground : DrawableGameComponent
+    public class HologramIridescenceShaderPlayground : DrawableGameComponent
     {
         private VertexPositionNormalTexture[] meshVertices;
         private BasicCamera camera;
@@ -18,19 +18,18 @@ namespace MonogameShaderPlayground.Playgrounds.HologramIridescenceRayMarching
 
         private HotReloadShaderManager hotReloadShaderManager;
 
-        public HologramIridescenceRayMarchingPlayground(Game game, BasicCamera camera) : base(game)
+        public HologramIridescenceShaderPlayground(Game game, BasicCamera camera) : base(game)
         {
             this.camera = camera;
 
-            hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\HologramIridescenceRayMarching\HologramIridescenceRayMarchingShader.fx");
+            hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\HologramIridescence\HologramIridescenceShader.fx");
         }
 
         public override void Initialize()
         {
             if (effect == null)
             {
-                effect = hotReloadShaderManager.Load("Shaders/HologramIridescenceRayMarchingShader");
-                // effect = Game.Content.Load<Effect>("Shaders/HologramIridescenceRayMarchingShader");
+                effect = hotReloadShaderManager.Load("Shaders/HologramIridescenceShader");
                 effect.Parameters["iChannel0"]?.SetValue(Game.Content.Load<Texture2D>("Textures/iridescence"));
             }
 

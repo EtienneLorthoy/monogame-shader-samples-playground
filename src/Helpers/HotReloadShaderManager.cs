@@ -48,7 +48,7 @@ namespace MonogameShaderPlayground.Helpers
             var game1 = game as Game1;
             this.content = game.Content;
             this.device = game.GraphicsDevice;
-            this.label = game1.label;
+            this.label = game1.playgroundInfolabel;
             this.Shader = null;
             this.TempContent = new ContentManager(content.ServiceProvider, content.RootDirectory);
             this.LastUpdate = DateTime.Now;
