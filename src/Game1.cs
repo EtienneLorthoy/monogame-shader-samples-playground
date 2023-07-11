@@ -6,6 +6,7 @@ using MonogameShaderPlayground.Helpers;
 using MonogameShaderPlayground.Playgrounds.HologramIridescence;
 using MonogameShaderPlayground.Playgrounds.RayMarching;
 using MonogameShaderPlayground.Playgrounds.RayMarchingShadows;
+using MonogameShaderPlayground.Playgrounds.RayMarchingSoftShadows;
 using MonogameShaderPlayground.Primitives;
 
 namespace MonogameShaderPlayground
@@ -37,8 +38,8 @@ namespace MonogameShaderPlayground
 
         protected override void Initialize()
         {
-            graphics.PreferredBackBufferWidth = 1280;
-            graphics.PreferredBackBufferHeight = 720;
+            graphics.PreferredBackBufferWidth = 1920;
+            graphics.PreferredBackBufferHeight = 1080;
             graphics.ApplyChanges();
 
             this.Components.Add(Camera);
@@ -69,12 +70,13 @@ namespace MonogameShaderPlayground
             // Raymarching techniques
             playgrounds.Add(new SimpleRayMarchingShaderPlayground(this, Camera));
             playgrounds.Add(new RayMarchingShadowsShaderPlayground(this, Camera));
+            playgrounds.Add(new RayMarchingSoftShadowsPlayground(this, Camera));
 
             // Monogame or C# interop specific techniques
             playgrounds.Add(new CustomVertexDeclarationPlayground(this, Camera));
 
             // Starting playground
-            var startingIndex = 11;
+            var startingIndex = 12;
             this.Components.Add(playgrounds[startingIndex]);
             this.playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[startingIndex].GetType().Name);
 
