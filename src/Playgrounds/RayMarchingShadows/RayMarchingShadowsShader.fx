@@ -78,8 +78,9 @@ const float DiffuseIntensity = 1.0f;
 const float4 SpecColor = float4(1.0f,1.0f,0.7f,0.0f);
 const float SpecIntensity = 1.0f;
 
-const float MaxRaymarchDist = 100.0f;
-const int MaxRaymarchStep = 50;
+// Scene parameters
+const float MaxRaymarchDist = 10.0f;
+const int MaxRaymarchStep = 25;
 const float DistToSurfaceThreshold = 0.01f;
 
 const float3 BoxPosition = float3(0.0f, 0.0f, 0.0f);
@@ -92,7 +93,7 @@ float BoxSignedDistance(float3 position, float3 boxSize)
 
 float SceneSignedDistance(float3 position)
 {
-	float dist = 100000000.;
+	float dist = MaxRaymarchDist;
 	for (int i = -1; i < 2; i++)
 	for (int j = -1; j < 2; j++)
 	for (int k = -1; k < 2; k++)
