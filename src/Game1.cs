@@ -79,7 +79,7 @@ namespace MonogameShaderPlayground
             this.playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[startingIndex].GetType().Name);
 
             // Utils
-            this.Components.Add(new Gizmo(this));
+            this.Components.Add(new Gizmo(this, Vector3.Zero));
             this.Components.Add(new FrameRateCounter(this));
 
             base.Initialize();
@@ -101,11 +101,14 @@ namespace MonogameShaderPlayground
                 foreach (var playground in playgrounds)
                 {
                     playground.Enabled = false;
+                    playground.Visible = false;
                     if (Components.Contains(playground)) Components.Remove(playground);
                 }
 
                 playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[index].GetType().Name);
                 playgrounds[index].Enabled = true;
+                playgrounds[index].Visible = true;
+
                 Components.Add(playgrounds[index]);
             }
 
@@ -119,6 +122,8 @@ namespace MonogameShaderPlayground
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            GraphicsDevice.BlendState = BlendState.NonPremultiplied;
 
             base.Draw(gameTime);
         }

@@ -1,8 +1,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Linq;
 using System;
 using MonogameShaderPlayground.Helpers;
+using System.Collections.Generic;
 
 namespace MonogameShaderPlayground.Playgrounds.RayMarchingShadows
 {
@@ -17,10 +17,14 @@ namespace MonogameShaderPlayground.Playgrounds.RayMarchingShadows
 
         private Texture2D baseColorTexture;
 
+        private Gizmo gizmoLight;
+
         public RayMarchingShadowsShaderPlayground(Game game, BasicCamera camera) : base(game)
         {
             this.camera = camera;
             hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\RayMarchingShadows\RayMarchingShadowsShader.fx");
+            this.gizmoLight = new Gizmo(game, new Vector3(0, 0, 0), 0.2f);
+            Game.Components.Add(gizmoLight);
         }
 
         public override void Initialize()
@@ -31,13 +35,33 @@ namespace MonogameShaderPlayground.Playgrounds.RayMarchingShadows
             baseColorTexture = Game.Content.Load<Texture2D>("Textures/MetalPanel/basecolor");
             effect.Parameters["ColorMap"]?.SetValue(baseColorTexture);
 
-            var meshVertices = VertexsBuilderHelper.ConstructVertexPositionNormalTextureCube(new Vector3(-0.5f, -0.5f, -0.5f), 1f);
-            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionNormalTexture), meshVertices.Length, BufferUsage.WriteOnly);
+            // Build cubes
+            // those are redefined in the shader, so you would need to somehow pass them to the shader or just update the shader code 
+            var meshVertices = new List<VertexPositionNormalTexture>();
+            for (int i = -1; i < 2; i++)
+            for (int j = -1; j < 2; j++)
+            for (int k = -1; k < 2; k++)
+            {
+                meshVertices.AddRange(VertexsBuilderHelper.ConstructVertexPositionNormalTextureCube(new Vector3(2f * i, 2f * j, 2f * k), 1f));
+            }
+            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionNormalTexture), meshVertices.Count, BufferUsage.WriteOnly);
             vertexBuffer.SetData(meshVertices.ToArray());
+
+            base.Initialize();
+        }
+
+        protected override void OnVisibleChanged(object sender, EventArgs args)
+        {
+            if (Visible == false) gizmoLight.Visible = false;
+            else gizmoLight.Visible = true;
+            base.OnVisibleChanged(sender, args);
         }
 
         public override void Update(GameTime gameTime)
         {
+            if (Enabled == false) gizmoLight.Enabled = false;
+            else gizmoLight.Enabled = true;
+
             if (hotReloadShaderManager.CheckForChanges()) Initialize();
 
             effect.Parameters["CameraPosition"].SetValue(camera.Position);
@@ -46,9 +70,10 @@ namespace MonogameShaderPlayground.Playgrounds.RayMarchingShadows
 
             // Light direction randomness can be fixed by commenting the following lines
             float x = (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds) * 2;
-            float y = 3;//((float)Math.Tan(gameTime.TotalGameTime.TotalSeconds) + 1) * 3;
+            float y = 1.5f;//((float)Math.Tan(gameTime.TotalGameTime.TotalSeconds) + 1) * 3;
             float z = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds) * 2;
             effect.Parameters["LightPosition"].SetValue(new Vector3(x, y, z));
+            gizmoLight.UpdatePosition(new Vector3(x, y, z));
 
             base.Update(gameTime);
         }

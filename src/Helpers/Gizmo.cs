@@ -9,33 +9,22 @@ namespace MonogameShaderPlayground.Helpers
     /// </summary>
     public class Gizmo : DrawableGameComponent
     {
-        VertexPositionColor[] vertices;
-        VertexBuffer buffer;
-        BasicEffect effect;
+        private VertexPositionColor[] vertices;
+        private VertexBuffer buffer;
+        private BasicEffect effect;
+        private float axisLength;
+        private Vector3 position;
 
-        public Gizmo(Game game) : base(game)
+        public Gizmo(Game game, Vector3 position, float axisLength = 1000f) : base(game)
         {
+            this.axisLength = axisLength;
+            this.position = position;
         }
 
         protected override void LoadContent()
         {
-            vertices = new VertexPositionColor[6];
-
-            // X
-            vertices[0] = new VertexPositionColor(new Vector3(0, 0, 0), Color.Red);
-            vertices[1] = new VertexPositionColor(new Vector3(1000, 0, 0), Color.Red);
-
-            // Y 
-            vertices[2] = new VertexPositionColor(new Vector3(0, 0, 0), Color.Green);
-            vertices[3] = new VertexPositionColor(new Vector3(0, 1000, 0), Color.Green);
-
-            // Z
-            vertices[4] = new VertexPositionColor(new Vector3(0, 0, 0), Color.Blue);
-            vertices[5] = new VertexPositionColor(new Vector3(0, 0, 1000), Color.Blue);
-
-            // Vertex Buffer
-            buffer = new VertexBuffer(Game.GraphicsDevice, VertexPositionColor.VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
-            buffer.SetData(vertices);
+            // Vertices
+            UpdatePosition(position);
 
             // Shader
             effect = new BasicEffect(Game.GraphicsDevice);
@@ -45,6 +34,30 @@ namespace MonogameShaderPlayground.Helpers
             effect.Projection = (Game as Game1).Camera.ProjectionMatrix;
 
             base.LoadContent();
+        }
+
+        public void UpdatePosition(Vector3 position)
+        {
+            this.position = position;
+            var p = position;
+            
+            vertices = new VertexPositionColor[6];
+
+            // X
+            vertices[0] = new VertexPositionColor(p, Color.Red);
+            vertices[1] = new VertexPositionColor(new Vector3(axisLength + p.X, p.Y, p.Z), Color.Red);
+
+            // Y 
+            vertices[2] = new VertexPositionColor(p, Color.Green);
+            vertices[3] = new VertexPositionColor(new Vector3(p.X, axisLength + p.Y, p.Z), Color.Green);
+
+            // Z
+            vertices[4] = new VertexPositionColor(p, Color.Blue);
+            vertices[5] = new VertexPositionColor(new Vector3(p.X, p.Y, axisLength + p.Z), Color.Blue);
+
+            // Vertex Buffer
+            buffer = new VertexBuffer(Game.GraphicsDevice, VertexPositionColor.VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
+            buffer.SetData(vertices);
         }
 
         public override void Update(GameTime gameTime)

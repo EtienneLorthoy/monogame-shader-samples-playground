@@ -90,6 +90,18 @@ float BoxSignedDistance(float3 position, float3 boxSize)
     return length(max(abs(position)-boxSize, 0.));
 }
 
+float SceneSignedDistance(float3 position)
+{
+	float dist = 100000000.;
+	for (int i = -1; i < 2; i++)
+	for (int j = -1; j < 2; j++)
+	for (int k = -1; k < 2; k++)
+	{
+		dist = min(dist, BoxSignedDistance(position - float3(2.0f * i, 2.0f * j, 2.0f * k) - BoxSize, BoxSize));
+	}
+	return dist;
+}
+
 float RayMarch(float3 rayOrigin, float3 rayDirection)
 {
 	float dist = 0.;
@@ -97,7 +109,7 @@ float RayMarch(float3 rayOrigin, float3 rayDirection)
 	for (int i = 0; i < MaxRaymarchStep; i++)
 	{
 		float3 currentPoint = rayOrigin + rayDirection * dist;
-		dist += BoxSignedDistance(currentPoint - BoxPosition, BoxSize);
+		dist += SceneSignedDistance(currentPoint);
 
 		if (dist < DistToSurfaceThreshold || dist > MaxRaymarchDist) break;
 	}
@@ -129,7 +141,7 @@ float4 PS(VertexOut input) : SV_TARGET
 	float3 ray = normalize(input.Ray);
 	float dist = RayMarch(CameraPosition, ray);
 	
-	if (dist > MaxRaymarchDist) return float4(0.1f,0.1f,0.1f, 0.1f);
+	if (dist > MaxRaymarchDist) discard;
 
 	// Shadow stage
 	float3 _point = CameraPosition + ray * dist;
