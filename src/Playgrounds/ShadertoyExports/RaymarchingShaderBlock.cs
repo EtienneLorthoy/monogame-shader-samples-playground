@@ -47,7 +47,7 @@ namespace MonogameShaderPlayground.Primitives
 
         public override void Update(GameTime gameTime)
         {
-            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.Projection);
+            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.ProjectionMatrix);
             effect.Parameters["iTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
             Vector2 mousePosition = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);

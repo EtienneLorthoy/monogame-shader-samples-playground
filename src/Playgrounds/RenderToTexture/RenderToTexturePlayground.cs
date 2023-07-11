@@ -44,7 +44,7 @@ namespace MonogameShaderPlayground.Primitives
 
         public override void Update(GameTime gameTime)
         {
-            effect.Parameters["WorldViewProjection"].SetValue(camera.ViewMatrix * camera.Projection);
+            effect.Parameters["WorldViewProjection"].SetValue(camera.ViewMatrix * camera.ProjectionMatrix);
             effect.Parameters["iTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
             base.Update(gameTime);

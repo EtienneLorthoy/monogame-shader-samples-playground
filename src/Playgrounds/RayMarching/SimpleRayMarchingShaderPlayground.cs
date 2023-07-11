@@ -38,7 +38,7 @@ namespace MonogameShaderPlayground.Playgrounds.RayMarching
 
             effect.Parameters["CameraPosition"].SetValue(camera.Position);
             effect.Parameters["CameraTarget"].SetValue(camera.Target);
-            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.Projection);
+            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.ProjectionMatrix);
 
             // Light direction randomness can be fixed by commenting the following lines
             float x = (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds) * 2;

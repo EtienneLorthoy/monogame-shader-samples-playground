@@ -44,7 +44,7 @@ namespace MonogameShaderPlayground.Primitives
 
         public override void Update(GameTime gameTime)
         {
-            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.Projection);
+            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.ProjectionMatrix);
             effect.Parameters["CameraPosition"].SetValue(camera.Position);
             
             // Light direction randomnes can be fixed by commenting the following lines

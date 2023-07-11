@@ -42,7 +42,7 @@ namespace MonogameShaderPlayground.Helpers
             effect.VertexColorEnabled = true;
             effect.World = Matrix.Identity;
             effect.LightingEnabled = false;
-            effect.Projection = (Game as Game1).Camera.Projection;
+            effect.Projection = (Game as Game1).Camera.ProjectionMatrix;
 
             base.LoadContent();
         }

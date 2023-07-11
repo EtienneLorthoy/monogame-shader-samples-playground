@@ -12,10 +12,9 @@
 // Global parameters
 //==============================================================================
 
-uniform float4x4 World;
 uniform float4x4 View;
 uniform float4x4 WorldViewProjection;
-uniform float2 ScreenSize;
+uniform float2 ViewportSize;
 uniform float3 CameraPosition;
 uniform float3 CameraTarget;
 
@@ -34,15 +33,17 @@ uniform sampler2D ColorMapSampler = sampler_state
 
 struct VertexIn
 {
-	float3 Position : POSITION;
+	float3 WorldPosition : POSITION;
     float2 TexCoord : TEXCOORD0;
+	float3 Normal : NORMAL;
 };
 
 struct VertexOut
 {
-	float4 Position : SV_POSITION;
+	float4 ScreenPosition : SV_POSITION;
     float2 TexCoord : TEXCOORD0;
-	float3 View : NORMAL2;
+	float3 Ray : NORMAL1;
+	float3 Normal : NORMAL2;
 };
 
 //==============================================================================
@@ -53,9 +54,11 @@ VertexOut VS(VertexIn input)
 {
 	VertexOut vout = (VertexOut)0;
 
-	vout.Position = mul(float4(input.Position, 1.0f), WorldViewProjection);		
+	vout.ScreenPosition = mul(float4(input.WorldPosition, 1.0f), WorldViewProjection);		
 	vout.TexCoord = input.TexCoord;
-	vout.View = normalize(CameraPosition - input.Position.xyz);
+	// vout.Ray = normalize(input.WorldPosition - CameraPosition);
+	vout.Ray = input.WorldPosition - CameraPosition;
+	vout.Normal = input.Normal;
 
 	return vout;
 }
@@ -76,10 +79,10 @@ const float4 SpecColor = float4(1.0f,1.0f,0.7f,0.0f);
 const float SpecIntensity = 1.0f;
 
 const float MaxRaymarchDist = 100.0f;
-const int MaxRaymarchStep = 100;
+const int MaxRaymarchStep = 50;
 const float DistToSurfaceThreshold = 0.01f;
 
-const float3 BoxPosition = float3(-0.25, -0.25, -0.25);
+const float3 BoxPosition = float3(0.0f, 0.0f, 0.0f);
 const float3 BoxSize = float3(0.5f, 0.5f, 0.5f);
 
 float BoxSignedDistance(float3 position, float3 boxSize)
@@ -102,23 +105,10 @@ float RayMarch(float3 rayOrigin, float3 rayDirection)
 	return dist; 
 }
 
-float3 GetNormal(float3 p) {
-	float d = BoxSignedDistance(p - BoxPosition, BoxSize);
-    float2 e = float2(.001, 0);
-    
-    float3 n = d - float3(
-         BoxSignedDistance(p-e.xyy - BoxPosition, BoxSize),
-         BoxSignedDistance(p-e.yxy - BoxPosition, BoxSize),
-         BoxSignedDistance(p-e.yyx - BoxPosition, BoxSize));
-    
-    return normalize(n);
-}
-
-float GetLight(float3 p)
+float GetLight(float3 p, float3 normal)
 {
 	float3 lightPos = LightPosition;
 	float3 lightDir = normalize(lightPos - p);
-	float3 normal = GetNormal(p);
 	float diffuse = clamp(max(dot(normal, lightDir), 0.0), 0.0f, 1.0f);
 
 	float d = RayMarch(p + normal * DistToSurfaceThreshold * 2, lightDir);
@@ -129,45 +119,30 @@ float GetLight(float3 p)
 
 float4 PS(VertexOut input) : SV_TARGET
 {
-	float4 diffuseTex = tex2D(ColorMapSampler, input.TexCoord);
-    float4 result = diffuseTex;
-	result.w = 1.0f;
-
-	// Base color
-	float4 baseColor = result;
+	float4 baseColor = tex2D(ColorMapSampler, input.TexCoord);
+    float4 result = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// Ambient stage
 	result = baseColor*float4((AmbientColor*AmbientIntensity).xyz, 1.0f);
 
-	// RayMarching 
-	float3 rayOrigin = CameraPosition;
-	float3 rayTarget = CameraTarget;
+	// RayMarching stage
+	float3 ray = normalize(input.Ray);
+	float dist = RayMarch(CameraPosition, ray);
+	
+	if (dist > MaxRaymarchDist) return float4(0.1f,0.1f,0.1f, 0.1f);
 
-	// Prim ray in projection space (PS)
-	float2 pri_xy = input.Position/ScreenSize * 2 - 1.0;
-	// Flip Y, screen space is top left, but we want bottom left
-	pri_xy.y = -pri_xy.y;
-	// We need to scale the Y coordinate by the aspect ratio to account for non-square pixels
-	pri_xy.y *= ScreenSize.y / ScreenSize.x;
-	pri_xy.y *= 0.55;
+	// Shadow stage
+	float3 _point = CameraPosition + ray * dist;
+	float shadow = GetLight(_point, input.Normal);
+	result.xyz *= max(shadow,0.1f);
 
-	float fieldOfView = 90.0;
-    float pri_z = ScreenSize.y / tan(radians(fieldOfView) / 2.0); 
-    float3 primRayDirection_PS = normalize(float3(pri_xy, pri_z));
+	// Debug each stage
+	// result = float4(baseColor);
+	// result = float4(ray, 1.0f);
+	// result = float4(dist/6,dist/6,dist/6, 1.0f);
+	// result = float4(input.Normal, 1.0f);
+	// result = float4(shadow,shadow,shadow, 1.0f);
 
-	// Prim ray in world space (WS)
-	float3 rayDir = mul(WorldViewProjection,primRayDirection_PS).xyz;
-
-	float dist = RayMarch(rayOrigin, rayDir);
-	//if (dist > MaxRaymarchDist) discard;
-
-	float3 _point = rayOrigin + rayDir * dist;
-	float shadow = GetLight(_point);
-	result = float4(baseColor.xyz * shadow, 1.0f);
-
-	float3 normal = GetNormal(_point);
-	result = float4(normal, 1.0f);
- 
 	return result;
 }
 

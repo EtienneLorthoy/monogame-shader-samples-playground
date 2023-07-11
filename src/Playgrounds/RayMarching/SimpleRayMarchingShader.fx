@@ -129,9 +129,7 @@ float GetLight(float3 p)
 
 float4 PS(VertexOut input) : SV_TARGET
 {
-	/////////////////
-	// RayMarching //
-	/////////////////
+	// RayMarching 
 	float3 rayOrigin = CameraPosition;
 	float3 rayTarget = CameraTarget;
 

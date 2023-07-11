@@ -46,7 +46,7 @@ namespace MonogameShaderPlayground.Playgrounds.HologramIridescence
                 effect.Parameters["iChannel0"]?.SetValue(Game.Content.Load<Texture2D>("Textures/iridescence"));
             }
 
-            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.Projection);
+            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.ProjectionMatrix);
             effect.Parameters["iTime"]?.SetValue((float)gameTime.TotalGameTime.TotalSeconds);
             effect.Parameters["CameraPosition"]?.SetValue(camera.Position);
 

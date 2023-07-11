@@ -26,14 +26,13 @@ namespace MonogameShaderPlayground.Playgrounds.RayMarchingShadows
         public override void Initialize()
         {
             effect = hotReloadShaderManager.Load("Shaders/RayMarchingShadowsShader");
-            effect.Parameters["World"].SetValue(Matrix.Identity);
-            effect.Parameters["ScreenSize"].SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+            effect.Parameters["ViewportSize"].SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
 
             baseColorTexture = Game.Content.Load<Texture2D>("Textures/MetalPanel/basecolor");
             effect.Parameters["ColorMap"]?.SetValue(baseColorTexture);
 
-            var meshVertices = VertexsBuilderHelper.ConstructVertexPositionTextureCube(new Vector3(-0.5f, -0.5f, -0.5f), 1f);
-            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionTexture), meshVertices.Length, BufferUsage.WriteOnly);
+            var meshVertices = VertexsBuilderHelper.ConstructVertexPositionNormalTextureCube(new Vector3(-0.5f, -0.5f, -0.5f), 1f);
+            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionNormalTexture), meshVertices.Length, BufferUsage.WriteOnly);
             vertexBuffer.SetData(meshVertices.ToArray());
         }
 
@@ -43,7 +42,7 @@ namespace MonogameShaderPlayground.Playgrounds.RayMarchingShadows
 
             effect.Parameters["CameraPosition"].SetValue(camera.Position);
             effect.Parameters["CameraTarget"].SetValue(camera.Target);
-            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.Projection);
+            effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.ProjectionMatrix);
 
             // Light direction randomness can be fixed by commenting the following lines
             float x = (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds) * 2;

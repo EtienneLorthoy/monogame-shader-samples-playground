@@ -10,12 +10,14 @@ namespace MonogameShaderPlayground.Helpers
     public class BasicCamera : GameComponent
     {
         public ref Matrix ViewMatrix => ref view;
+        public ref Matrix ProjectionMatrix => ref projection;
+
         public Vector3 Direction { get => Vector3.Normalize(cameraTarget - cameraPosition); }
-        public Matrix Projection { get; protected set; }
         public Vector3 Position { get => cameraPosition; set => cameraPosition = value; }
         public Vector3 Target { get => cameraTarget; set => cameraTarget = value; }
 
         private Matrix view;
+        private Matrix projection;
         private Vector3 cameraPosition;
         private Vector3 cameraTarget;
         private Vector3 cameraUp;
@@ -27,8 +29,13 @@ namespace MonogameShaderPlayground.Helpers
             cameraPosition = new Vector3(2, 1, 2);
             cameraTarget = target;
             cameraUp = up;
+        }
 
-            Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, Game.Window.ClientBounds.Width / (float)Game.Window.ClientBounds.Height, 1, 1024);
+        public override void Initialize()
+        {
+            projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, Game.Window.ClientBounds.Width / (float)Game.Window.ClientBounds.Height, 1, 1024);
+
+            base.Initialize();
         }
 
         public override void Update(GameTime gameTime)

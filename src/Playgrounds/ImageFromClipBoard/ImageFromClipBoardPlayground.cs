@@ -22,7 +22,7 @@ namespace MonogameShaderPlayground.Primitives
         {
             effect = new BasicEffect(Game.GraphicsDevice);
             effect.World = Matrix.Identity;
-            effect.Projection = camera.Projection;
+            effect.Projection = camera.ProjectionMatrix;
             effect.LightingEnabled = false;
             effect.VertexColorEnabled = false;
 
