@@ -79,6 +79,12 @@
 /processorParam:DebugMode=Auto
 /build:../Playgrounds/RayMarchingSoftShadows/RayMarchingSoftShadowsShader.fx;Shaders/RayMarchingSoftShadowsShader.fx
 
+#begin ../Playgrounds/MultipleImportanceSampling/MultipleImportanceSamplingShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../Playgrounds/MultipleImportanceSampling/MultipleImportanceSamplingShader.fx;Shaders/MultipleImportanceSamplingShader.fx
+
 #begin Fonts/Font.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor

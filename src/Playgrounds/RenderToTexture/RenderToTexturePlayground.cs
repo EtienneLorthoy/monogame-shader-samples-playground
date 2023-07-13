@@ -53,7 +53,6 @@ namespace MonogameShaderPlayground.Primitives
         public override void Draw(GameTime gameTime)
         {
             GraphicsDevice.SetRenderTarget(renderTarget);
-            GraphicsDevice.Clear(Color.Transparent);
             effect.CurrentTechnique = effect.Techniques["Technique0"];
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, effect, null);
             spriteBatch.Draw(renderTexture, new Rectangle(0, 0, renderTarget.Width, renderTarget.Height), Color.White);

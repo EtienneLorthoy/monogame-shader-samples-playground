@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonogameShaderPlayground.Helpers;
 using MonogameShaderPlayground.Playgrounds.HologramIridescence;
+using MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling;
 using MonogameShaderPlayground.Playgrounds.RayMarching;
 using MonogameShaderPlayground.Playgrounds.RayMarchingShadows;
 using MonogameShaderPlayground.Playgrounds.RayMarchingSoftShadows;
@@ -28,6 +30,7 @@ namespace MonogameShaderPlayground
             graphics.IsFullScreen = false;
             graphics.SynchronizeWithVerticalRetrace = false;
             IsFixedTimeStep = false;
+            // TargetElapsedTime = TimeSpan.FromSeconds(1d / 30d);
             Window.AllowAltF4 = true;
 
             Content.RootDirectory = "Content";
@@ -72,11 +75,14 @@ namespace MonogameShaderPlayground
             playgrounds.Add(new RayMarchingShadowsShaderPlayground(this, Camera));
             playgrounds.Add(new RayMarchingSoftShadowsPlayground(this, Camera));
 
+            // Multiple Importance Sampling techniques
+            playgrounds.Add(new MultipleImportanceSamplingPlayground(this, Camera));
+
             // Monogame or C# interop specific techniques
             playgrounds.Add(new CustomVertexDeclarationPlayground(this, Camera));
 
             // Starting playground
-            var startingIndex = 12;
+            var startingIndex = 13;
             this.Components.Add(playgrounds[startingIndex]);
             this.playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[startingIndex].GetType().Name);
 
