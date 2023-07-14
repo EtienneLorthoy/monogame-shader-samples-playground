@@ -5,13 +5,11 @@
 // Global parameters
 //==============================================================================
 
-uniform float4x4 View;
 uniform float4x4 WorldViewProjection;
 uniform float2 ViewportSize;
 uniform float3 CameraPosition;
 uniform float3 CameraTarget;
 uniform float iTime;
-uniform float iFrame;
 
 uniform float LerpBalance;
 
@@ -73,14 +71,6 @@ const float4 DiffuseColor = float4(1.0f,1.0f,0.8f,0.0f);
 const float DiffuseIntensity = 1.0f;
 const float4 SpecColor = float4(1.0f,1.0f,0.7f,0.0f);
 const float SpecIntensity = 1.0f;
-
-// Scene parameters
-const float MaxRaymarchDist = 10.0f;
-const int MaxRaymarchStep = 50;
-const float DistToSurfaceThreshold = 0.001f;
-
-const float3 BoxPosition = float3(0.0f, 0.0f, 0.0f);
-const float3 BoxSize = float3(0.5f, 0.5f, 0.5f);
 
 //// Common functions
 
@@ -174,7 +164,6 @@ float3x3 CoordBase(float3 n){
     frisvad(n,x,y);
     return float3x3(x,y,n);
 }
-
 
 float3 ToOtherSpaceCoord(float3x3 otherSpaceCoord,float3 vector_){
 	return mul(vector_,otherSpaceCoord);
@@ -623,12 +612,14 @@ MIS: [0]https://graphics.stanford.edu/courses/cs348b-03/papers/veach-chapter9.pd
 #define GI_DEPTH 3
 
 /*Scene Objects*/
-#define N_QUADS 2
-#define N_BOXES 9
+#define N_QUADS 5
+#define N_BOXES 100
 
 /*Type*/
 #define LIGHT 0
 #define DIFF 1
+#define REFR 2
+#define SPEC 3
 
 const float3 BACKGROUD_COL = float3(0.,0.,0.);
 
@@ -882,20 +873,32 @@ float SceneIntersect( Ray r, inout Intersection intersec ){
 }
 
 void SetupScene(){    
-    // quads[0] = NewQuad(float3(0.,-1.,0.),float3(0.0,5.,0.), float3(1.0,5.,0.), float3(1.0 ,5. ,1. ), float3(0.0,5.,1.), float3(0.6,0.6,0.6), float3(0.4,0.5,0.6),0.4, LIGHT);  
-    quads[0] = NewQuad(float3(0.,0.,1.),float3(-0.5,0.,-1.), float3(0.5,0.,-1.), float3(0.5 ,0.55 ,-1. ), float3(-0.5,0.55,-1.), float3(0.6,0.6,0.6), float3(0.4,0.5,0.6),0.4, LIGHT); 
-    quads[1] = NewQuad(float3(0.,1.,0.),float3(-1.0,0.,-1.), float3(1.0,0.,-1.), float3(1.0 ,0. ,1. ), float3(-1.0,0.,1.), float3(0.6,0.6,0.6), float3(0.4,0.5,0.6),0.4, DIFF);
+	// Walls // struct Quad { float3 normal; float3 v0; float3 v1; float3 v2; float3 v3; float3 emission; float3 color; float roughness; int type; };
+	float3 emission = float3(1.0,1.0,1.0);
+	float3 color = float3(1.0,0.0,0.0);
+	quads[0] = NewQuad(float3(0.,0.,1.),float3(-1.,0.,-1.1), float3(-1.,0.5,-1.1), float3(1. ,0.5 ,-1.1 ), float3(1.,0.,-1.1), emission, color,0.4, LIGHT);
+	// quads[1] = NewQuad(float3(-1.,0.,0.),float3(1.1,0.,-1.), float3(1.1,.5,-1.), float3(1.1,.5,1. ), float3(1.1,0.,1.), emission, color,0.4, LIGHT);
+
+    // Floor
+	quads[2] = NewQuad(float3(0.,1.,0.),float3(-1.0,0.,-1.), float3(1.0,0.,-1.), float3(1.0 ,0. ,1. ), float3(-1.0,0.,1.), float3(0.3,0.3,0.3), float3(1.0,1.0,1.0),0.4, SPEC);
     
+	// Cube color palette
     float3 currentBoxSize = float3(0.1,0.1,0.1);
-    int boxesSizeCount = 3;
+    int boxesSizeCount = 9;
     for (int i=0;i<boxesSizeCount;i++)
     for (int j=0;j<boxesSizeCount;j++)
     {
-        float floati = float(i) * 0.2 - float(boxesSizeCount) * 0.5 * 0.2;
-        float floatj = float(j) * 0.2 - float(boxesSizeCount) * 0.5 * 0.2;
-        float3 currentPos = float3(floati, 0.0, floatj);
-        boxes[j + i*boxesSizeCount] = NewBox(currentPos, currentPos + currentBoxSize, float3(0.,0.,0.), float3(0.,0.2,0.1), 0.1, j+i % 2);
+        float floati = (i) * 0.2 - (boxesSizeCount) * 0.5 * 0.2;
+        float floatj = (j) * 0.2 - (boxesSizeCount) * 0.5 * 0.2;
+        float3 currentPos = float3(floati, 0.001, floatj);
+		int currentIndex = i*boxesSizeCount + j;
+		float currentIndexN = (float(currentIndex) / float(boxesSizeCount * boxesSizeCount));
+		float3 boxColor = float3(sin(currentIndexN * TWO_PI) / 2 + 0.5, cos(currentIndexN * TWO_PI) / 2 + 0.5, tan(currentIndexN * TWO_PI) / 2 + 0.5);
+        boxes[j + i*boxesSizeCount] = NewBox(currentPos, currentPos + currentBoxSize, float3(1.,0.,100.), boxColor, 0.2, SPEC);
     }
+
+	// Moving cube
+	//boxes[0] = NewBox(LightPosition + float3(0.,1.,0.), LightPosition + currentBoxSize * 5, float3(1.,1.,1.)*10, float3(0.6,0.6,0.6), 0.2, LIGHT);
 }
 
 #define time iTime*0.1
@@ -1092,7 +1095,7 @@ float4 PS(BufferAVertexOut input) : SV_TARGET
 
 	// Blend
 	float3 oldColor = tex2D(iChannel0Sampler,U/R).rgb;
-	float lerpValue = 1. / clamp(LerpBalance, 0.5, 22.);
+	float lerpValue = 1. / clamp(LerpBalance, 0.5, 20.);
 	C = float4(lerp (oldColor, newColor, lerpValue), 1.0);
 
 	return C;

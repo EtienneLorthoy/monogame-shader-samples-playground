@@ -16,11 +16,11 @@ namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
         private HotReloadShaderManager hotReloadShaderManager;
         private Effect effect;
         private RenderTarget2D diffRenderTarget;
+        private Texture2D lastFrameTexture;
+        private Color[] lastFrameTextureData;
         private SpriteBatch spriteBatch;
 
         private float lerpBalance = 0f;
-
-        private Texture2D baseColorTexture;
 
         private Gizmo gizmoLight;
 
@@ -36,11 +36,10 @@ namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
         {
             effect = hotReloadShaderManager.Load("Shaders/MultipleImportanceSamplingShader");
             effect.Parameters["ViewportSize"].SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+            effect.Parameters["LerpBalance"].SetValue(0.5f);
 
-            baseColorTexture = Game.Content.Load<Texture2D>("Textures/MetalPanel/basecolor");
-            effect.Parameters["ColorMap"]?.SetValue(baseColorTexture);
-
-            effect.Parameters["LerpBalance"].SetValue(0f);
+            lastFrameTexture = new Texture2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            lastFrameTextureData = new Color[GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height];
             
             spriteBatch = new SpriteBatch(GraphicsDevice);
             if (diffRenderTarget != null) diffRenderTarget.Dispose();
@@ -88,15 +87,14 @@ namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
             effect.Parameters["CameraPosition"].SetValue(camera.Position);
             effect.Parameters["CameraTarget"].SetValue(camera.Target);
             effect.Parameters["iTime"].SetValue((float)gameTime.TotalGameTime.TotalMilliseconds);
-            effect.Parameters["iFrame"].SetValue(effect.Parameters["iFrame"].GetValueSingle() + 1);
             effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.ProjectionMatrix);
 
             effect.Parameters["LerpBalance"].SetValue(lerpBalance);
 
             // Light direction randomness can be fixed by commenting the following lines
-            float x = (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds /2) * 2;
-            float y = 1.5f;//((float)Math.Tan(gameTime.TotalGameTime.TotalSeconds) + 1) * 3;
-            float z = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds /2) * 2;
+            float x = (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds /2);
+            float y = 0.5f;
+            float z = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds /2);
             effect.Parameters["LightPosition"].SetValue(new Vector3(x, y, z));
             gizmoLight.UpdatePosition(new Vector3(x, y, z));
 
@@ -106,15 +104,13 @@ namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
         public override void Draw(GameTime gameTime)
         {
             // Convert the old frame in a texture
-            var data = new Color[diffRenderTarget.Width * diffRenderTarget.Height];
-            diffRenderTarget.GetData<Color>(data);
-            var texture = new Texture2D(this.GraphicsDevice, diffRenderTarget.Width, diffRenderTarget.Height);
-            texture.SetData<Color>(data);
+            diffRenderTarget.GetData<Color>(lastFrameTextureData);
+            lastFrameTexture.SetData<Color>(lastFrameTextureData);
 
             // Draw the scene in buffer A
             GraphicsDevice.SetRenderTarget(diffRenderTarget);
             effect.CurrentTechnique = effect.Techniques["BufferA"];
-            effect.Parameters["iChannel0"]?.SetValue(texture);
+            effect.Parameters["iChannel0"]?.SetValue(lastFrameTexture);
             GraphicsDevice.SetVertexBuffer(vertexBuffer);
             foreach (var pass in effect.CurrentTechnique.Passes)
             {
@@ -129,14 +125,6 @@ namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, effect, null);
             spriteBatch.Draw(diffRenderTarget, Vector2.Zero, Color.White);
             spriteBatch.End();
-            
-            // Debug the lols
-            spriteBatch.Begin();
-            spriteBatch.Draw(diffRenderTarget, new Rectangle(0, 0, diffRenderTarget.Width/3, diffRenderTarget.Height/3), Color.White);
-            spriteBatch.End();
-            // Debug the lols
-
-            texture.Dispose();
         }
     }
 }
