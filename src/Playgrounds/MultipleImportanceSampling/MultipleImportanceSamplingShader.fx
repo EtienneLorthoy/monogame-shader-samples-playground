@@ -613,7 +613,7 @@ MIS: [0]https://graphics.stanford.edu/courses/cs348b-03/papers/veach-chapter9.pd
 
 /*Scene Objects*/
 #define N_QUADS 5
-#define N_BOXES 100
+#define N_BOXES 50
 
 /*Type*/
 #define LIGHT 0
@@ -679,8 +679,6 @@ Intersection NewIntersection(float distance, float2 uv, float3 normal, float3 em
 struct Light{float radius;float3 direction;float3 emission;float radiance;float pdf;int type;};
 struct Material{float id;float2 uv;float3 normal;float3 specular;float3 diffuse;float roughness;int type;}; 
     
-// RWStructuredBuffer<Quad> quads;
-// RWStructuredBuffer<Box> boxes;
 static Quad quads[N_QUADS];
 static Box boxes[N_BOXES];
     
@@ -827,9 +825,12 @@ float BoxIntersect( float3 minCorner, float3 maxCorner, Ray r, out float3 normal
 }
 
 // I = ΔΦ/4π
-const float3 LIGHTCOLOR = float3(0.8,0.8,0.3);
 float3 GetLightIntensity(){
-	return 50.* LIGHTCOLOR;
+	return 50.* ONE;
+}
+
+float3 GetLightIntensityFrom(float3 col){
+	return GetLightIntensity() * col;
 }
 
 float SceneIntersect( Ray r, inout Intersection intersec ){
@@ -872,19 +873,21 @@ float SceneIntersect( Ray r, inout Intersection intersec ){
     return d;
 }
 
-void SetupScene(){    
+void SetupScene()
+{ 
 	// Walls // struct Quad { float3 normal; float3 v0; float3 v1; float3 v2; float3 v3; float3 emission; float3 color; float roughness; int type; };
-	float3 emission = float3(1.0,1.0,1.0);
+	float3 emission = float3(0.8f,0.8f,0.1f);
 	float3 color = float3(1.0,0.0,0.0);
-	quads[0] = NewQuad(float3(0.,0.,1.),float3(-1.,0.,-1.1), float3(-1.,0.5,-1.1), float3(1. ,0.5 ,-1.1 ), float3(1.,0.,-1.1), emission, color,0.4, LIGHT);
+	float zD  = int(sqrt(N_BOXES)) * 0.1 * 1.1 * -1.0; // distFromFirstCubeRow
+	quads[0] = NewQuad(float3(0.,0.,1.),float3(-1.,0.,zD), float3(-1.,0.5,zD), float3(1. ,0.5 ,zD), float3(1.,0.,zD), emission, color,0.4, LIGHT);
 	// quads[1] = NewQuad(float3(-1.,0.,0.),float3(1.1,0.,-1.), float3(1.1,.5,-1.), float3(1.1,.5,1. ), float3(1.1,0.,1.), emission, color,0.4, LIGHT);
 
     // Floor
-	quads[2] = NewQuad(float3(0.,1.,0.),float3(-1.0,0.,-1.), float3(1.0,0.,-1.), float3(1.0 ,0. ,1. ), float3(-1.0,0.,1.), float3(0.3,0.3,0.3), float3(1.0,1.0,1.0),0.4, SPEC);
+	quads[2] = NewQuad(float3(0.,1.,0.),float3(-1.0,0.,-1.), float3(1.0,0.,-1.), float3(1.0 ,0. ,1. ), float3(-1.0,0.,1.), float3(0.8,0.8,0.3), float3(1.0,1.0,1.0),0.8, SPEC);
     
 	// Cube color palette
     float3 currentBoxSize = float3(0.1,0.1,0.1);
-    int boxesSizeCount = 9;
+    int boxesSizeCount = int(sqrt(N_BOXES));
     for (int i=0;i<boxesSizeCount;i++)
     for (int j=0;j<boxesSizeCount;j++)
     {
@@ -894,7 +897,10 @@ void SetupScene(){
 		int currentIndex = i*boxesSizeCount + j;
 		float currentIndexN = (float(currentIndex) / float(boxesSizeCount * boxesSizeCount));
 		float3 boxColor = float3(sin(currentIndexN * TWO_PI) / 2 + 0.5, cos(currentIndexN * TWO_PI) / 2 + 0.5, tan(currentIndexN * TWO_PI) / 2 + 0.5);
-        boxes[j + i*boxesSizeCount] = NewBox(currentPos, currentPos + currentBoxSize, float3(1.,0.,100.), boxColor, 0.2, SPEC);
+
+		int type = SPEC;
+		if ((int(iTime/500.) - currentIndex) % (boxesSizeCount * boxesSizeCount) == 0) type = LIGHT;
+        boxes[j + i*boxesSizeCount] = NewBox(currentPos, currentPos + currentBoxSize, boxColor, boxColor, 0.2, type);
     }
 
 	// Moving cube
@@ -909,7 +915,7 @@ Material GetMaterial(Intersection _intersec){
     mat.uv = _intersec.uv;
     mat.normal = _intersec.normal;
     mat.diffuse = _intersec.color;
-    mat.specular = LIGHTCOLOR;
+    mat.specular = _intersec.emission;
     mat.roughness = _intersec.roughness;
     return mat;
 }
@@ -929,7 +935,7 @@ float PDF_Area2Angle(float pdf,float dist,float costhe){
 	|	 O	 |
 	v0------v1
 */
-float3 LightSample(float3 p,float x1,float x2,out float3 wo,out float dist,out float pdf){
+float3 LightSample(float3 p,float x1,float x2, out float3 wo,out float dist,out float pdf){
 	float3 v0v1 = quads[0].v1 - quads[0].v0;
     float3 v0v3 = quads[0].v3 - quads[0].v0;
     float width  = length(v0v1);
@@ -975,7 +981,7 @@ float3 LightingDirectSample(Material mat,float3 p,float3 nDir,float3 vDir,out fl
     float x1 = GetRandom(),x2 = GetRandom();
     float3 wo;
     float dist;
-    float3 Li = LightSample(p,x1,x2,wo,dist,pdf);
+    float3 Li = LightSample(p,x1,x2,wo,dist,pdf) * mat.specular;
     float WoDotN = dot(wo,nDir);
     if(WoDotN >= 0. && pdf > 0.0001){
         float3 Lr = MicroFactEvalution(mat,nDir,wo,vDir);
@@ -1024,7 +1030,7 @@ float3 LightingBRDFSample(Material mat,float3 p,float3 nDir,float3 vDir,inout fl
     ray = NewRay(p,wo);
     if(path_pdf > 0.0001){
         if(_intersec.type == LIGHT && cosTheta(L_local)>0.){
-            L = GetLightIntensity()/(d*d)*Lr*dot(wo,nDir)/part_pdf;
+            L = GetLightIntensityFrom(_intersec.emission)/(d*d)*Lr*dot(wo,nDir)/part_pdf;
         }
         L /=path_pdf;
     }
@@ -1044,7 +1050,7 @@ float3 Radiance(Ray ray,float x1){
     if(SceneIntersect(ray,intersecNow)>=INFINITY)
     	return BACKGROUD_COL;
     if(intersecNow.type == LIGHT){
-        Lo = GetLightIntensity();
+        Lo = GetLightIntensityFrom(intersecNow.emission);
         return Lo;
     }
     for(int step=0;step<GI_DEPTH;step++){
