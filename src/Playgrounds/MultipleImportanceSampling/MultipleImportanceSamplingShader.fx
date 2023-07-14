@@ -10,7 +10,6 @@ uniform float2 ViewportSize;
 uniform float3 CameraPosition;
 uniform float3 CameraTarget;
 uniform float iTime;
-
 uniform float LerpBalance;
 
 uniform Texture2D iChannel0;
@@ -21,6 +20,10 @@ uniform sampler2D iChannel0Sampler = sampler_state
     MagFilter = linear;
     MipFilter = linear;
 };
+
+/*Scene Objects*/
+#define N_QUADS 5
+#define N_BOXES 50
 
 //==============================================================================
 // Interstage structures
@@ -611,9 +614,6 @@ MIS: [0]https://graphics.stanford.edu/courses/cs348b-03/papers/veach-chapter9.pd
 */
 #define GI_DEPTH 3
 
-/*Scene Objects*/
-#define N_QUADS 5
-#define N_BOXES 50
 
 /*Type*/
 #define LIGHT 0
@@ -676,9 +676,7 @@ Intersection NewIntersection(float distance, float2 uv, float3 normal, float3 em
 	return i;
 }
 
-struct Light{float radius;float3 direction;float3 emission;float radiance;float pdf;int type;};
-struct Material{float id;float2 uv;float3 normal;float3 specular;float3 diffuse;float roughness;int type;}; 
-    
+struct Material{float id;float2 uv;float3 normal;float3 specular;float3 diffuse;float roughness;int type;};     
 static Quad quads[N_QUADS];
 static Box boxes[N_BOXES];
     
@@ -876,14 +874,15 @@ float SceneIntersect( Ray r, inout Intersection intersec ){
 void SetupScene()
 { 
 	// Walls // struct Quad { float3 normal; float3 v0; float3 v1; float3 v2; float3 v3; float3 emission; float3 color; float roughness; int type; };
-	float3 emission = float3(0.8f,0.8f,0.1f);
+	float3 emission = float3(0.2f,0.2f,0.1f);
 	float3 color = float3(1.0,0.0,0.0);
 	float zD  = int(sqrt(N_BOXES)) * 0.1 * 1.1 * -1.0; // distFromFirstCubeRow
-	quads[0] = NewQuad(float3(0.,0.,1.),float3(-1.,0.,zD), float3(-1.,0.5,zD), float3(1. ,0.5 ,zD), float3(1.,0.,zD), emission, color,0.4, LIGHT);
+	zD = min(zD, -1.0);
+	quads[0] = NewQuad(float3(0.,0.,1.),float3(-.5,0.,zD), float3(-.5,0.5,zD), float3(.5 ,0.5 ,zD), float3(.5,0.,zD), emission, color,0.4, LIGHT);
 	// quads[1] = NewQuad(float3(-1.,0.,0.),float3(1.1,0.,-1.), float3(1.1,.5,-1.), float3(1.1,.5,1. ), float3(1.1,0.,1.), emission, color,0.4, LIGHT);
 
     // Floor
-	quads[2] = NewQuad(float3(0.,1.,0.),float3(-1.0,0.,-1.), float3(1.0,0.,-1.), float3(1.0 ,0. ,1. ), float3(-1.0,0.,1.), float3(0.8,0.8,0.3), float3(1.0,1.0,1.0),0.8, SPEC);
+	quads[2] = NewQuad(float3(0.,1.,0.),float3(-1.0,0.,-1.), float3(1.0,0.,-1.), float3(1.0 ,0. ,1. ), float3(-1.0,0.,1.), float3(0.8,0.8,0.3), float3(.2,.2,.2),0.8, SPEC);
     
 	// Cube color palette
     float3 currentBoxSize = float3(0.1,0.1,0.1);
@@ -900,7 +899,7 @@ void SetupScene()
 
 		int type = SPEC;
 		if ((int(iTime/500.) - currentIndex) % (boxesSizeCount * boxesSizeCount) == 0) type = LIGHT;
-        boxes[j + i*boxesSizeCount] = NewBox(currentPos, currentPos + currentBoxSize, boxColor, boxColor, 0.2, type);
+        boxes[j + i*boxesSizeCount] = NewBox(currentPos, currentPos + currentBoxSize, boxColor, boxColor, 0.8, type);
     }
 
 	// Moving cube
@@ -1101,7 +1100,7 @@ float4 PS(BufferAVertexOut input) : SV_TARGET
 
 	// Blend
 	float3 oldColor = tex2D(iChannel0Sampler,U/R).rgb;
-	float lerpValue = 1. / clamp(LerpBalance, 0.5, 20.);
+	float lerpValue = 1. / clamp(LerpBalance, 0.5, 22.);
 	C = float4(lerp (oldColor, newColor, lerpValue), 1.0);
 
 	return C;
