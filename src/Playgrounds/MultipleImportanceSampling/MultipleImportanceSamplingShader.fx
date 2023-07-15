@@ -32,16 +32,12 @@ uniform sampler2D iChannel0Sampler = sampler_state
 struct BufferAVertexIn
 {
 	float3 WorldPosition : POSITION;
-    float2 TexCoord : TEXCOORD0;
-	float3 Normal : NORMAL;
 };
 
 struct BufferAVertexOut
 {
 	float4 ScreenPosition : SV_POSITION;
-    // float2 TexCoord : TEXCOORD0;
 	float3 Ray : NORMAL1;
-	// float3 Normal : NORMAL2;
 };
 
 //==============================================================================
@@ -53,9 +49,7 @@ BufferAVertexOut VSBufferA(BufferAVertexIn input)
 	BufferAVertexOut vout = (BufferAVertexOut)0;
 
 	vout.ScreenPosition = mul(float4(input.WorldPosition, 1.0f), WorldViewProjection);		
-	// vout.TexCoord = input.TexCoord;
 	vout.Ray = input.WorldPosition - CameraPosition;
-	// vout.Normal = input.Normal;
 
 	return vout;
 }
@@ -64,16 +58,6 @@ BufferAVertexOut VSBufferA(BufferAVertexIn input)
 //==============================================================================
 // Pixel shader
 //==============================================================================
-
-const float4 AmbientColor = float4(1.0f,1.0f,1.0f,0.0f);
-const float AmbientIntensity = 0.8f;
-	
-float3 LightDirection = float3(0.5f,0.5f,0.2f);
-float3 LightPosition = float3(5.0f,5.0f,2.0f);
-const float4 DiffuseColor = float4(1.0f,1.0f,0.8f,0.0f);
-const float DiffuseIntensity = 1.0f;
-const float4 SpecColor = float4(1.0f,1.0f,0.7f,0.0f);
-const float SpecIntensity = 1.0f;
 
 //// Common functions
 
@@ -88,17 +72,6 @@ const float SpecIntensity = 1.0f;
 #define ONE_OVER_FOUR_PI 		0.0795775
 #define OFFSET_COEF 			0.0001
 #define INFINITY         		1000000.0
-//--------------------Material Fresnel-------------------- 
-#define F0_WATER        0.02	
-#define F0_PLASTIC      0.03	
-#define F0_PLASTIC_HIGH 0.05	
-#define F0_GLASS        0.08	
-#define F0_DIAMOND      0.17	
-#define F0_IRON         0.56	
-#define F0_COPPER       0.95	
-#define F0_GOLD         1.00	
-#define F0_ALUMINIUM    0.91	
-#define F0_SILVER       0.95
 
 //Monte Carlo by Importance Samplering Methods
 /*
@@ -125,32 +98,7 @@ float sinTheta(float3 w) { return sqrt(clamp(sinTheta2(w),0.,1.)); }
 float tanTheta2(float3 w) { return sinTheta2(w) / cosTheta2(w); }
 float tanTheta(float3 w) { return sinTheta(w) / cosTheta(w); }
 
-float cosPhi(float3 w) { return w.x / sinTheta(w);}
-float sinPhi(float3 w) { return w.y / sinTheta(w);}
-float cosPhi2(float3 w){ return w.x*w.x/sinTheta2(w);}
-float sinPhi2(float3 w){ return w.y*w.y/sinTheta2(w);}
-//angle(θ,ϕ)
-float3 Angle2Cartesian(float2 angle){
-	float SinTheta = sin(angle.x);
-	float2 CosSinPhi = float2(cos(angle.y),sin(angle.y));
-	return float3(SinTheta*CosSinPhi,cos(angle.x)); //x,y,z
-}
 //http://orbit.dtu.dk/files/126824972/onb_frisvad_jgt2012_v2.pdf
-void naive (float3 n,float3 b1,float3 b2){
-    // If n is near the x-axis , use the y- axis . Otherwise use the x- axis .
-    if(n.x > 0.9) b1 = float3(0.0,1.0,0.0);
-    else b1 = float3(1.0,0.0,0.0);
-    b1 -= n* dot (b1 , n ); // Make b1 orthogonal to n
-    b1 *= rsqrt(dot(b1,b1)); // Normalize b1
-    b2 = cross (n , b1 ); // Construct b2 using a cross product
-}
-void hughes_moeller (float3 n,float3 b1,float3 b2 ){
-    // Choose a vector orthogonal to n as the direction of b2.
-    if(abs(n.x )>abs(n.z)) b2 = float3(-n.y,n.x,0.);
-    else b2 = float3 (0.,-n.z,n.y );
-    b2 *= rsqrt(dot(b2,b2 )); // Normalize b2
-    b1 = cross (b2 , n ); // Construct b1 using a cross product
-}
 void frisvad(in float3 n, out float3 f, out float3 r){
     if(n.z < -0.999999) {
         f = float3(0.,-1,0);
@@ -162,6 +110,7 @@ void frisvad(in float3 n, out float3 f, out float3 r){
     	r = float3(b, 1. - n.y*n.y*a , -n.y);
     }
 }
+
 float3x3 CoordBase(float3 n){
 	float3 x,y;
     frisvad(n,x,y);
@@ -171,33 +120,16 @@ float3x3 CoordBase(float3 n){
 float3 ToOtherSpaceCoord(float3x3 otherSpaceCoord,float3 vector_){
 	return mul(vector_,otherSpaceCoord);
 }
+
 float3 RotVector(float3x3 otherSpaceCoord,float3 vector_){
 	return mul(otherSpaceCoord, vector_);
 }
-//-----------------Specular BRDF Microfacet---------------
-/*
-			   D(h)F(v,h)G(l,v,h)		D(Distribution)   
-	f(l,v) = ———————————-    F(Fresnel)
-				   4(n•l)(n•v)			G(Geometry)
-*/
-//--->Distribution Term<----
-float D_GGX(float roughress,float3 N,float3 H){
-	float r2 = POW2(roughress);
-    float cosTheta2 = POW2(dot(N,H));
-    return (1.0/PI) * sqrt(roughress/(cosTheta2 * (r2 - 1.0) + 1.0));	
-}
+
 //------>Fresnel Term<------
 float F_Schlick(float F0, float3 L,float3 H){
     return F0 + (1.0 - F0)*POW5(1.0-dot(L,H));
 }
-/*
-	https://github.com/thefranke/dirtchamber/blob/master/shader/brdf.hlsl
-*/
-#define OneOnLN2_x6 8.656170 // == 1/ln(2) * 6   (6 is SpecularPower of 5 + 1)
-float3 F_schlick_opt(float3 SpecularColor,float3 E,float3 H){
-    // In this case SphericalGaussianApprox(1.0f - saturate(dot(E, H)), OneOnLN2_x6) is equal to exp2(-OneOnLN2_x6 * x)
-    return SpecularColor + (1.0 - SpecularColor) * exp2(-OneOnLN2_x6 * clamp(0.,1.,dot(E, H)));
-}
+
 //------------Multiple Importance Sample Weight-----------
 /*
 	heuristic
@@ -211,52 +143,8 @@ float MISWeight(float a,float b){
 float MISWeight(float coffe_a,float aPDF,float coffe_b,float bPDF){
     return MISWeight(coffe_a * aPDF,coffe_b*bPDF);
 }
+
 //--------------Probability Density Function and Sample--------------
-/*
-	----------------GGX NDF-----------------
-	D(m)  	 = a^2/(PI*((a^2-1)*cos^2(θ)+1)^2)
-	Ph(ω) 	= a^2*cos(θ)/(PI*((a^2-1)*cos^2(θ)+1)^2) 
-	Ph(θ,ϕ) = a^2*cos(θ)*sin(θ)/(PI*((a^2-1)*cos^2(θ)+1)^2)
-	So we can get θ,ϕ by inverse CDF
-		ϕ = 2*PI*ϵ      
-		θ = arccos{sqrt[(1-ϵ)/(ϵ*(a^2-1)+1)]} Or θ = arctan{a*sqrt[ϵ/(1-ϵ)]} 
-	Note: ϵ or 1-ϵ is uniform distribution noise at (0,1)
-*/
-float2 GGXSampleAngle(float x1,float x2,float a){
-	float phi   = TWO_PI * x2;
-	float theta = atan(a*sqrt(x1/(1.0-x1)));
-	return float2(theta,phi);
-}
-/*
-	----------------Beckmann NDF-----------------
-	D(m)  	= 	   1/(PI*a^2*cos^4(θ)))*ϵ^-(tan(θ)/a)^2
-	Ph(ω) 	= 	   1/(PI*a^2*cos^3(θ)))*ϵ^-(tan(θ)/a)^2
-	Ph(θ,ϕ) = sin(θ)/(PI*a^2*cos^3(θ)))*ϵ^-(tan(θ)/a)^2
-	So we can get θ,ϕ by inverse CDF
-		ϕ = 2*PI*ϵ      
-		θ = arccos{sqrt[1/(1-a^2*ln(1-ϵ))]} Or θ = arctan{sqrt[-a^2*ln(1-ϵ)]} 
-	Note: ϵ or 1-ϵ is uniform distribution noise at (0,1)
-*/
-float2 BeckmannSampleAngle(float x1,float x2,float a){
-	float phi	= TWO_PI * x2;
-	float theta = atan(sqrt(-a*a*log(1.0-x1)));
-	return float2(theta,phi);
-}
-/*
-	----------------Blinn NDF-----------------
-	D(m)  	 = (a+2)/_2PI * [cos(θ)]^(a)
-	Ph(ω) 	= (a+2)/_2PI * [cos(θ)]^(a+1)
-	Ph(θ,ϕ) = (a+2)/_2PI * [cos(θ)]^(a+1) * sin(θ)
-	So we can get θ,ϕ by inverse CDF
-		ϕ = 2*PI*ϵ      
-		θ = arccos{1/(ϵ^(a+2))}  Or  θ = arccos{1/(ϵ^(a+1))}  <note:form PBRT>
-	Note: ϵ or 1-ϵ is uniform distribution noise at (0,1)
-*/
-float2 BlinSampleAngle(float x1,float x2,float a){
-	float phi   = TWO_PI * x2;
-	float theta = acos(1.0/pow(x1,a+1.0));		//<note:form PBRT>
-	return float2(theta,phi);
-}
 /*---------------------------------
 	Whether it’s solid angle or spherical coordinate. 
 	What we have so far is the pdf for half-vector,a transformation is necessary.
@@ -265,18 +153,14 @@ float2 BlinSampleAngle(float x1,float x2,float a){
 float PDF_h2theta(float pdf_h,float3 wi,float3 wh){
 	return 0.25*pdf_h/dot(wi,wh);//return pdf_h/(4.0*dot(wo,wh));
 }
-float3 UniformUnitShpereRay(float x1,float x2){
-	float theta = PI * x1;
-    float phi   = TWO_PI * x2;
-    float sinTheta = sin(theta);
-    return float3(sinTheta*cos(phi),sinTheta*sin(phi),cos(theta));
-}
-float3 DiffuseUnitSpehreRay(float x1,float x2){
+
+float3 DiffuseUnitSphereRay(float x1,float x2){
 	float theta = acos(sqrt(1.0-x1));
     float phi   = TWO_PI * x2;
     float sinTheta = sin(theta);
     return float3(sinTheta*cos(phi),sinTheta*sin(phi),cos(theta));
 }
+
 /*
 Form https://www.shadertoy.com/view/4ssXRX
 	 https://www.shadertoy.com/view/MslGR8
@@ -285,18 +169,20 @@ Form https://www.shadertoy.com/view/4ssXRX
 float nrand( float2 n ){
 	return frac(sin(dot(n.xy, float2(12.9898, 78.233)))* 43758.5453);
 }
-//float GetRandom(float seed){return frac(sin(seed)*43758.5453123);}
+
 float TriangularNoise(float2 n,float time){
     float t = frac(time);
 	float nrnd0 = nrand( n + 0.07*t );
 	float nrnd1 = nrand( n + 0.11*t );
 	return (nrnd0+nrnd1) / 2.0;
 }
+
 float2 TriangularNoise2DShereRay(float2 n,float time){
 	float theta = TWO_PI*GetRandom();
     float r = TriangularNoise(n,time);
     return float2(cos(theta),sin(theta))*(1.-r);
 }
+
 //---------------VNDF-----------------
 /*
 	https://hal.inria.fr/hal-00942452v1/document
@@ -391,157 +277,12 @@ float3 GammaCorrect(float3 col,float3 coeff){
 float3 ExposureCorrect(float3 col, float linfac, float logfac){
 	return linfac*(1.0 - exp(col*logfac));
 }
+
 /*
 	An almost-perfect approximation from http://chilliant.blogspot.com.au/2012/08/srgb-approximations-for-hlsl.html?m=1
 */
-float3 GammaToLinear(float3 sRGB){
-    return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
-}
-float3 LinearToGamma(float3 linRGB){
-    linRGB = max(linRGB, float3(0., 0., 0.));
-    return max(1.055 * pow(linRGB, float3(0.416666667,0.416666667,0.416666667)) - 0.055, float3(0.,0.,0.));
-}
-float3 SimpleToneMapping(float3 col){
-	return 1.0/(1.0+col);
-}
 float Luminance(float3 linearRGB){
     return dot(linearRGB, float3(0.2126729,  0.7151522, 0.0721750));
-}
-//------------------------YCoCg-R---------------------------
-//x:Y y:Co z:Cg
-/*
-	Co  = R - B;
-	tmp = B + Co/2;
-	Cg  = G - tmp;
-	Y   = tmp + Cg/2;
-*/
-float3 RGB2YCoCg_R(float3 RGB) {
-	float3 YCoCg_R;//x:Y y:Co z:Cg
-	YCoCg_R.y = RGB.r - RGB.b;
-	float tmp = RGB.b + YCoCg_R.y / 2.;
-	YCoCg_R.z = RGB.g - tmp;
-	YCoCg_R.x = tmp + YCoCg_R.z / 2.;
-	return YCoCg_R;
-}
-/*
-	tmp = Y - Cg/2;
-	G   = Cg + tmp;
-	B   = tmp - Co/2;
-	R   = B + Co;
-*/
-float3 YCoCg_R2RGB(float3 YCoCg_R) {
-	float3 RGB;
-	float tmp = YCoCg_R.x - YCoCg_R.z / 2.;
-	RGB.g = YCoCg_R.z + tmp;
-	RGB.b = tmp - YCoCg_R.y / 2.;
-	RGB.r = RGB.b + YCoCg_R.y;
-	return RGB;
-}
-//-------------------------YCoCg----------------------------
-/*
-	 Y = R/4 + G/2 + B/4
-	Co = R/2 - B/2
-	Cg =-R/4 + G/2 - B/4
-*/
-float3 RGB2YCoCg(float3 RGB) {
-	float3 YCoCg;
-	YCoCg.x =  RGB.r / 4. + RGB.g / 2. + RGB.b / 4.;
-	YCoCg.y =  RGB.r / 2. - RGB.b / 2. ;
-	YCoCg.z = -RGB.r / 4. + RGB.g / 2. - RGB.b / 4.;
-	return YCoCg;
-}
-/*
-	R = Y + Co - Cg
-	G = Y + Cg
-	B = Y - Co - Cg
-*/
-float3 YCoCg2RGB(float3 YCoCg) {
-	float3 RGB;
-	RGB.r = YCoCg.x + YCoCg.y - YCoCg.z;
-	RGB.g = YCoCg.x + YCoCg.z;
-	RGB.b = YCoCg.x - YCoCg.y - YCoCg.z;
-	return RGB;
-}
-/*
-	ACES
-	https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
-*/
-float3 ACESFilm(float3 x ){
-    const float a = 2.51;
-    const float b = 0.03;
-    const float c = 2.43;
-    const float d = 0.59;
-    const float e = 0.14;
-    return clamp(float3(0., 0., 0.),float3(1., 1., 1.),(x*(a*x+b))/(x*(c*x+d)+e));
-}
-/*
-	http://filmicworlds.com/blog/filmic-tonemapping-operators/
-	https://de.slideshare.net/hpduiker/filmic-tonemapping-for-realtime-rendering-siggraph-2010-color-course
-*/
-const float A = 0.15;//ShoulderStrength
-const float B = 0.50;//LinearStrength
-const float C = 0.10;//LinearAngle
-const float D = 0.20;//ToeStrength
-const float E = 0.02;
-const float F = 0.30;
-const float W = 10.2;
-
-float3 Uncharted2Tonemap(float3 x){
-   	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
-}
-#define Gamma 2.2
-float3 ACESFilmicToneMapping(float3 col){
-	float3 curr = Uncharted2Tonemap(col);
-    const float ExposureBias = 2.0;
-	curr *= ExposureBias;
-    curr /= Uncharted2Tonemap(float3(W,W,W));
-    return LinearToGamma(curr);
-}
-/*
-	https://github.com/TheRealMJP/BakingLab/blob/master/BakingLab/ToneMapping.hlsl
-*/
-float3 Linear2sRGB(float3 color){
-    float3 x = color * 12.92;
-    float3 y = 1.055 * pow(clamp(float3(0.,0.,0.),float3(1.,1.,1.),color),float3(0.4166667,0.4166667,0.4166667)) - 0.055;
-    float3 clr = color;
-    clr.r = color.r < 0.0031308 ? x.r : y.r;
-    clr.g = color.g < 0.0031308 ? x.g : y.g;
-    clr.b = color.b < 0.0031308 ? x.b : y.b;
-    return clr;
-}
-float3 sRGB2Linear(float3 color){
-    float3 x = color / 12.92f;
-    float3 y = pow(max((color+0.055f)/1.055, 0.0),float3(2.4, 2.4, 2.4));
-    float3 clr = color;
-    clr.r = color.r <= 0.04045 ? x.r : y.r;
-    clr.g = color.g <= 0.04045 ? x.g : y.g;
-    clr.b = color.b <= 0.04045 ? x.b : y.b;
-    return clr;
-}
-// Applies the filmic curve from John Hable's presentation
-float3 ToneMapFilmicALU(float3 color){
-    color = max(float3(0., 0., 0.),color-0.004);
-    color = (color*(6.2*color+0.5))/(color*(6.2*color+1.7)+0.06);
-    return color;
-}
-float3 ColorGrade(float3 vColor){
-    float3 vHue = float3(.97, .8, .2);
-    float3 vGamma = 1. + vHue * 0.6;
-    float3 vGain = float3(0.9, 0.9, 0.9) + vHue * vHue * 8.0;
-    vColor *= 1.5;
-    float fMaxLum = 100.0;
-    vColor /= fMaxLum;
-    vColor = pow( vColor, vGamma );
-    vColor *= vGain;
-    vColor *= fMaxLum;  
-    return vColor;
-}
-
-#define _LUT_Size 16.
-float3 ColorGradeLUT(sampler2D _LUT,float3 color) {
-    float3 coord = color*(_LUT_Size -1.);
-    coord.xy = float2((coord.x + _LUT_Size*floor(coord.z)+.5)/ (_LUT_Size*_LUT_Size),(coord.y+0.5)/ _LUT_Size);
-    return tex2D(_LUT,coord.xy).rgb;
 }
 
 /*
@@ -963,7 +704,7 @@ float3 MicroFactEvalution(Material mat,float3 nDir,float3 wo,float3 wi){
     float alpha = mat.roughness;
     float3 H_local = normalize(L_local + E_local);
     float D = GGX_Distribution(H_local, alpha, alpha);
-    float F = F_Schlick(F0_ALUMINIUM, L_local,H_local);
+    float F = F_Schlick(0.91, L_local,H_local);
     float G = GGX_G2(L_local, E_local, alpha, alpha);
     float3 specular_Col = mat.specular*0.25*D*G/clamp(L_local.z*E_local.z,0.,1.);
     float3 diffuse_Col = mat.diffuse*INVERSE_PI;
@@ -1013,7 +754,7 @@ float3 LightingBRDFSample(Material mat,float3 p,float3 nDir,float3 vDir,inout fl
     float path_pdf = 0.;
     if(GetRandom() < part_pdf){
         //diffuse ray
-        L_local = DiffuseUnitSpehreRay(x1,x2);
+        L_local = DiffuseUnitSphereRay(x1,x2);
         path_pdf = Diffuse_PDF(L_local);
     }
     else{
@@ -1159,7 +900,7 @@ float4 PS2(float4 position : POSITION0) : COLOR0
 	// float4 result = tex2D(bufferASampler, position.xy / ViewportSize.xy);
 	float4 result = FXAA(bufferASampler, position.xy / ViewportSize.xy,R);
     result.rgb = ExposureCorrect(result.rgb,2.1, -0.8);
-    //result.rgb = ACESFilmicToneMapping(result.rgb);
+    // result.rgb = GammaToLinear(result.rgb);
  
 	return result;
 }

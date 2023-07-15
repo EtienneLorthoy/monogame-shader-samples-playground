@@ -1,9 +1,9 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using MonogameShaderPlayground.Helpers;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
 {
@@ -19,17 +19,29 @@ namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
         private Texture2D lastFrameTexture;
         private Color[] lastFrameTextureData;
         private SpriteBatch spriteBatch;
-
         private float lerpBalance = 0f;
-
-        private Gizmo gizmoLight;
 
         public MultipleImportanceSamplingPlayground(Game game, BasicCamera camera) : base(game)
         {
             this.camera = camera;
             hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\MultipleImportanceSampling\MultipleImportanceSamplingShader.fx");
-            gizmoLight = new Gizmo(game, new Vector3(0, 0, 0), 0.2f);
-            Game.Components.Add(gizmoLight);
+        }
+
+        protected override void OnEnabledChanged(object sender, EventArgs args)
+        {
+            if (Enabled) 
+            {
+                // Cool looking angle
+                camera.Position = new Vector3(-1.3f, 0.7f, -1.6f);
+            }
+            else
+            {
+                if (diffRenderTarget != null) diffRenderTarget.Dispose();
+                if (lastFrameTexture != null) lastFrameTexture.Dispose();
+                if (vertexBuffer != null) vertexBuffer.Dispose();
+            }
+
+            base.OnEnabledChanged(sender, args);
         }
 
         public override void Initialize()
@@ -52,8 +64,8 @@ namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
                                                     0, 
                                                     RenderTargetUsage.PlatformContents);
 
-            // Build cubes
-            // those are redefined in the shader, so you would need to somehow pass them to the shader or just update the shader code 
+            // TODO: I could use spritebatch and calculate rays from the screen, but I'm lazy, so I'll just use vertex cube to give
+            // the shader the ray it needs to reconstruct the scene, keep in mind that those geometries are not used in the shader.
             var meshVertices = new List<VertexPositionNormalTexture>();
             for (int i = -1; i < 2; i++)
                 for (int j = -1; j < 2; j++)
@@ -67,18 +79,8 @@ namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
             base.Initialize();
         }
 
-        protected override void OnVisibleChanged(object sender, EventArgs args)
-        {
-            if (Visible == false) gizmoLight.Visible = false;
-            else gizmoLight.Visible = true;
-            base.OnVisibleChanged(sender, args);
-        }
-
         public override void Update(GameTime gameTime)
         {
-            if (Enabled == false) gizmoLight.Enabled = false;
-            else gizmoLight.Enabled = true;
-
             if (hotReloadShaderManager.CheckForChanges()) Initialize();
 
             if (Mouse.GetState().RightButton == ButtonState.Pressed) lerpBalance = 0.5f;
@@ -88,15 +90,7 @@ namespace MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling
             effect.Parameters["CameraTarget"].SetValue(camera.Target);
             effect.Parameters["iTime"].SetValue((float)gameTime.TotalGameTime.TotalMilliseconds);
             effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.ProjectionMatrix);
-
             effect.Parameters["LerpBalance"].SetValue(lerpBalance);
-
-            // Light direction randomness can be fixed by commenting the following lines
-            float x = (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds /2);
-            float y = 0.5f;
-            float z = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds /2);
-            effect.Parameters["LightPosition"].SetValue(new Vector3(x, y, z));
-            gizmoLight.UpdatePosition(new Vector3(x, y, z));
 
             base.Update(gameTime);
         }
