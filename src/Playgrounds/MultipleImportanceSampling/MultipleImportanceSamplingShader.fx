@@ -420,44 +420,6 @@ Intersection NewIntersection(float distance, float2 uv, float3 normal, float3 em
 struct Material{float id;float2 uv;float3 normal;float3 specular;float3 diffuse;float roughness;int type;};     
 static Quad quads[N_QUADS];
 static Box boxes[N_BOXES];
-    
-bool solveQuadratic(float A, float B, float C, out float t0, out float t1){
-	float discrim = B*B-4.0*A*C;
-    
-	if ( discrim < 0.0 )
-        	return false;
-    
-	float rootDiscrim = sqrt(discrim);
-
-	float Q = (B > 0.0) ? -0.5 * (B + rootDiscrim) : -0.5 * (B - rootDiscrim); 
-	float t_0 = Q / A; 
-	float t_1 = C / Q;
-	
-	t0 = min( t_0, t_1 );
-	t1 = max( t_0, t_1 );
-    
-	return true;
-}
-
-float DiskIntersect( float3 diskPos, float3 normal, float radius, Ray r ){
-	float3 n = normalize(-normal);
-	float3 pOrO = diskPos - r.origin;
-	float denom = dot(n, r.direction);
-	// use the following for one-sided disk
-	//if (denom <= 0.0)
-	//	return INFINITY;
-	
-        float result = dot(pOrO, n) / denom;
-	if (result < 0.0)
-		return INFINITY;
-        float3 intersectPos = r.origin + r.direction * result;
-	float3 v = intersectPos - diskPos;
-	float d2 = dot(v,v);
-	float radiusSq = radius * radius;
-	if (d2 > radiusSq)
-		return INFINITY;
-	return result;
-}
 
 float QuadIntersect( float3 v0, float3 v1, float3 v2, float3 v3, float3 normal, Ray r ){
 	float3 u, v, n;    // triangle vectors
@@ -585,7 +547,8 @@ float SceneIntersect( Ray r, inout Intersection intersec ){
 	intersec.roughness = 0.;
 	intersec.type = 0;
    
-    for(int i=0;i<N_QUADS;i++){
+    for(int i=0;i<N_QUADS;i++)
+	{
         t = QuadIntersect( quads[i].v0, quads[i].v1, quads[i].v2, quads[i].v3, quads[i].normal, r );
         if (t < d){
         	d = t;
@@ -597,7 +560,8 @@ float SceneIntersect( Ray r, inout Intersection intersec ){
         }
     }
 	
-    for(int i=0;i<N_BOXES;i++){
+    for(int i=0;i<N_BOXES;i++)
+	{
     	t = BoxIntersect(boxes[i].minCorner,boxes[i].maxCorner,r,normal);
         if(t < d){
         	d = t;
