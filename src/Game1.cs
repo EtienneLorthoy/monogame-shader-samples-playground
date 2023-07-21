@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonogameShaderPlayground.Helpers;
+using MonogameShaderPlayground.Playgrounds.CubeVoxels;
 using MonogameShaderPlayground.Playgrounds.HologramIridescence;
 using MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling;
 using MonogameShaderPlayground.Playgrounds.RayMarching;
@@ -78,11 +78,14 @@ namespace MonogameShaderPlayground
             // Multiple Importance Sampling techniques
             playgrounds.Add(new MultipleImportanceSamplingPlayground(this, Camera));
 
+            // Datastructures
+            playgrounds.Add(new SimpleCubeVoxelsPlayground(this, Camera));
+
             // Monogame or C# interop specific techniques
             playgrounds.Add(new CustomVertexDeclarationPlayground(this, Camera));
 
             // Starting playground
-            var startingIndex = 13;
+            var startingIndex = 14;
             this.Components.Add(playgrounds[startingIndex]);
             this.playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[startingIndex].GetType().Name);
 
@@ -108,9 +111,13 @@ namespace MonogameShaderPlayground
 
                 foreach (var playground in playgrounds)
                 {
+                    // Remove/reseting playground
                     playground.Enabled = false;
                     playground.Visible = false;
                     if (Components.Contains(playground)) Components.Remove(playground);
+                    Camera.Target = Vector3.Zero;
+                    Camera.Position = Vector3.One * 2;
+                    Camera.SwingFactor = 2f;
                 }
 
                 playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[index].GetType().Name);

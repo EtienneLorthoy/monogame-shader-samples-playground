@@ -16,6 +16,8 @@ namespace MonogameShaderPlayground.Helpers
         public Vector3 Position { get => cameraPosition; set => cameraPosition = value; }
         public Vector3 Target { get => cameraTarget; set => cameraTarget = value; }
 
+        public float SwingFactor;
+
         private Matrix view;
         private Matrix projection;
         private Vector3 cameraPosition;
@@ -29,6 +31,7 @@ namespace MonogameShaderPlayground.Helpers
             cameraPosition = new Vector3(2, 1, 2);
             cameraTarget = target;
             cameraUp = up;
+            SwingFactor = 2f;
         }
 
         public override void Initialize()
@@ -43,9 +46,9 @@ namespace MonogameShaderPlayground.Helpers
             // Mouse logic captive/free
             if (Mouse.GetState().RightButton == ButtonState.Pressed)
             {
-                cameraPosition.X = (float)(Math.Sin(Mouse.GetState().X / 100f) * 2f);
-                cameraPosition.Z = (float)(Math.Cos(Mouse.GetState().X / 100f) * 2f);
-                cameraPosition.Y = (float)(Math.Cos(Mouse.GetState().Y / 100f) * 2f);
+                cameraPosition.X = (float)(Math.Sin(Mouse.GetState().X / 100f) * SwingFactor);
+                cameraPosition.Z = (float)(Math.Cos(Mouse.GetState().X / 100f) * SwingFactor);
+                cameraPosition.Y = (float)(Math.Cos(Mouse.GetState().Y / 100f) * SwingFactor);
             }
             if (Mouse.GetState().LeftButton == ButtonState.Pressed && Keyboard.GetState().IsKeyDown(Keys.LeftShift))
             {
@@ -55,16 +58,13 @@ namespace MonogameShaderPlayground.Helpers
             }
             else if (Keyboard.GetState().IsKeyDown(Keys.R))
             {
-                cameraPosition.X = (float)(Math.Cos(gameTime.TotalGameTime.TotalSeconds) * 2f);
-                cameraPosition.Z = (float)(Math.Sin(gameTime.TotalGameTime.TotalSeconds) * 2f);
-                cameraPosition.Y = (float)(Math.Cos(gameTime.TotalGameTime.TotalSeconds * 3) * 2f);
+                cameraPosition.X = (float)(Math.Cos(gameTime.TotalGameTime.TotalSeconds) * SwingFactor);
+                cameraPosition.Z = (float)(Math.Sin(gameTime.TotalGameTime.TotalSeconds) * SwingFactor);
+                cameraPosition.Y = (float)(Math.Cos(gameTime.TotalGameTime.TotalSeconds * 3) * SwingFactor);
             }
 
             // Update Camera
-            if (Game.IsActive)
-            {
-                Matrix.CreateLookAt(ref cameraPosition, ref cameraTarget, ref cameraUp, out view);
-            }
+            Matrix.CreateLookAt(ref cameraPosition, ref cameraTarget, ref cameraUp, out view);
 
             base.Update(gameTime);
         }
