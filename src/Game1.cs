@@ -6,6 +6,7 @@ using MonogameShaderPlayground.Helpers;
 using MonogameShaderPlayground.Playgrounds.CubeVoxels;
 using MonogameShaderPlayground.Playgrounds.HologramIridescence;
 using MonogameShaderPlayground.Playgrounds.MISCubeVoxels;
+using MonogameShaderPlayground.Playgrounds.MISCubeVoxelsDenoise;
 using MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling;
 using MonogameShaderPlayground.Playgrounds.RayMarching;
 using MonogameShaderPlayground.Playgrounds.RayMarchingShadows;
@@ -79,8 +80,9 @@ namespace MonogameShaderPlayground
             // Multiple Importance Sampling techniques (MIS)
             playgrounds.Add(new MultipleImportanceSamplingPlayground(this, Camera));
 
-            // MIS + Voxel
+            // Composed playgrounds
             playgrounds.Add(new MISCubeVoxelsPlayground(this, Camera));
+            playgrounds.Add(new MISCubeVoxelsDenoisePlayground(this, Camera));
 
             // Datastructures
             playgrounds.Add(new SimpleCubeVoxelsPlayground(this, Camera));
@@ -89,7 +91,7 @@ namespace MonogameShaderPlayground
             playgrounds.Add(new CustomVertexDeclarationPlayground(this, Camera));
 
             // Starting playground
-            var startingIndex = 14;
+            var startingIndex = 15;
             this.Components.Add(playgrounds[startingIndex]);
             this.playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[startingIndex].GetType().Name);
 
@@ -123,6 +125,7 @@ namespace MonogameShaderPlayground
                 Camera.Target = Vector3.Zero;
                 Camera.Position = Vector3.One * 2;
                 Camera.SwingFactor = 2f;
+                Camera.PotatoMode = true;
 
                 playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[index].GetType().Name);
                 playgrounds[index].Enabled = true;

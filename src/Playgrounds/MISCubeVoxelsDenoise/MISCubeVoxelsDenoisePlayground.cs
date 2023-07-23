@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
 using System;
 
-namespace MonogameShaderPlayground.Playgrounds.MISCubeVoxels
+namespace MonogameShaderPlayground.Playgrounds.MISCubeVoxelsDenoise
 {
-    public class MISCubeVoxelsPlayground : DrawableGameComponent
+    public class MISCubeVoxelsDenoisePlayground : DrawableGameComponent
     {
         private VertexBuffer vertexBuffer;
 
@@ -23,14 +23,19 @@ namespace MonogameShaderPlayground.Playgrounds.MISCubeVoxels
 
         private Texture3D texture3D;
 
+        private Gizmo gizmoLight;
+
         private int vms = 128; // voxelMatrixSize
         private int vmh = 32; // voxelMatrixHeight
 
-        public MISCubeVoxelsPlayground(Game game, BasicCamera camera) : base(game)
+        public MISCubeVoxelsDenoisePlayground(Game game, BasicCamera camera) : base(game)
         {
             this.camera = camera;
-            hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\MISCubeVoxels\MISCubeVoxelsShader.fx");
-                    
+            hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\MISCubeVoxelsDenoise\MISCubeVoxelsDenoiseShader.fx");
+        
+            this.gizmoLight = new Gizmo(game, new Vector3(0, 0, 0), 5.0f);
+            Game.Components.Add(gizmoLight);
+            
             // Cool looking angle
             camera.Position = new Vector3(-6, 5.4f, -7.4f);
             camera.Target = new Vector3(vms / 2, 0, vms / 2);
@@ -58,7 +63,7 @@ namespace MonogameShaderPlayground.Playgrounds.MISCubeVoxels
 
         public override void Initialize()
         {
-            effect = hotReloadShaderManager.Load("Shaders/MISCubeVoxelsShader");
+            effect = hotReloadShaderManager.Load("Shaders/MISCubeVoxelsDenoiseShader");
             effect.Parameters["ViewportSize"].SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
             effect.Parameters["LerpBalance"].SetValue(0.5f);
 
@@ -120,6 +125,13 @@ namespace MonogameShaderPlayground.Playgrounds.MISCubeVoxels
             effect.Parameters["iTime"].SetValue((float)gameTime.TotalGameTime.TotalMilliseconds);
             effect.Parameters["WorldViewProjection"].SetValue(Matrix.Identity * camera.ViewMatrix * camera.ProjectionMatrix);
             effect.Parameters["LerpBalance"].SetValue(lerpBalance);
+
+            // Light direction randomness can be fixed by commenting the following lines
+            float x = (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds) * 20 + vms / 2;
+            float y = 10;//((float)Math.Tan(gameTime.TotalGameTime.TotalSeconds) + 1) * 3;
+            float z = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds) * 20 + vms / 2;
+            effect.Parameters["LightPosition"].SetValue(new Vector3(x, y, z));
+            gizmoLight.UpdatePosition(new Vector3(x, y, z));
             
             base.Update(gameTime);
         }

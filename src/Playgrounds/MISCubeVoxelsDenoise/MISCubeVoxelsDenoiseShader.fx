@@ -57,11 +57,13 @@ BufferAVertexOut VSBufferA(BufferAVertexIn input)
 // Pixel shader
 //==============================================================================
 
-//// Voxel
-float LightIntensity = 10.0f;
+//// Lights
+float LightIntensity = 20.0f;
+float3 LightPosition = float3(5.0f,5.0f,2.0f);
+float3 BackLightPosition = normalize(float3(-1.0f,-1.0f,-2.0f));
 
+//// Voxel
 const int maxIter = 256;
-const float voxelSize = 0.01f;
 
 bool voxelHit(float3 pos) 
 {
@@ -332,49 +334,6 @@ float Luminance(float3 linearRGB){
     return dot(linearRGB, float3(0.2126729,  0.7151522, 0.0721750));
 }
 
-/*
-	https://www.shadertoy.com/view/MdyyRt from 834144373
-	Or you can easy find from wiki
-*/
-#define _Strength 10.
-float4 FXAA(sampler2D _Tex,float2 uv,float2 RenderSize){
-    float3 e = float3(1./RenderSize,0.);
-
-    float reducemul = 0.125;// 1. / 8.;
-    float reducemin = 0.0078125;// 1. / 128.;
-
-    float4 Or = tex2D(_Tex,uv); //P
-    float4 LD = tex2D(_Tex,uv - e.xy); //左下
-    float4 RD = tex2D(_Tex,uv + float2( e.x,-e.y)); //右下
-    float4 LT = tex2D(_Tex,uv + float2(-e.x, e.y)); //左上
-    float4 RT = tex2D(_Tex,uv + e.xy); // 右上
-
-    float Or_Lum = Luminance(Or.rgb);
-    float LD_Lum = Luminance(LD.rgb);
-    float RD_Lum = Luminance(RD.rgb);
-    float LT_Lum = Luminance(LT.rgb);
-    float RT_Lum = Luminance(RT.rgb);
-
-    float min_Lum = min(Or_Lum,min(min(LD_Lum,RD_Lum),min(LT_Lum,RT_Lum)));
-    float max_Lum = max(Or_Lum,max(max(LD_Lum,RD_Lum),max(LT_Lum,RT_Lum)));
-
-    //x direction,-y direction
-    float2 dir = float2((LT_Lum+RT_Lum)-(LD_Lum+RD_Lum),(LD_Lum+LT_Lum)-(RD_Lum+RT_Lum));
-    float dir_reduce = max((LD_Lum+RD_Lum+LT_Lum+RT_Lum)*reducemul*0.25,reducemin);
-    float dir_min = 1./(min(abs(dir.x),abs(dir.y))+dir_reduce);
-    dir = min(float2(_Strength,_Strength),max(-float2(_Strength, _Strength),dir*dir_min)) * e.xy;
-
-    //------
-    float4 resultA = 0.5*(tex2D(_Tex,uv-0.166667*dir)+tex2D(_Tex,uv+0.166667*dir));
-    float4 resultB = resultA*0.5+0.25*(tex2D(_Tex,uv-0.5*dir)+tex2D(_Tex,uv+0.5*dir));
-    float B_Lum = Luminance(resultB.rgb);
-
-    //return resultA;
-    if(B_Lum < min_Lum || B_Lum > max_Lum)
-        return resultA;
-    else 
-        return resultB;
-}
 //// Common functions
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -703,7 +662,7 @@ float3 LightingBRDFSample(Material mat,float3 p,float3 nDir,float3 vDir,inout fl
     return L;
 }
 
-float3 Radiance(Ray ray,float x1)
+float3 Radiance(Ray ray,float x1, inout float3 normal)
 {
     Intersection intersecNow;
     Intersection intersecNext;
@@ -719,6 +678,8 @@ float3 Radiance(Ray ray,float x1)
 
 	// Direct lighting
     if(intersecNow.type == LIGHT) return GetLightIntensityFrom(intersecNow.emission);
+	
+	normal = intersecNow.normal;
 
 	// Indirect lighting
     for(int step=0;step<GI_DEPTH;step++)
@@ -754,7 +715,7 @@ float4 PS(BufferAVertexOut input) : SV_TARGET
 	float noise = TriangularNoise(U.x+U.y, iTime);
     seed = iTime*sin(noise) + (U.x+R.x*U.y)/(R.y);
 	// Top Light
-    // lighquad = NewLightQuad(float3(0.,-1.,0.5),float3(0.f,64.f,0.f), float3(0.f,64.f,128.f), float3(128.f,64.,0.f), float3(128.0f,.64f,128.f), float3(0.8f,0.8f,0.3f), float3(1.0,0.0,0.0),0.4);
+    // lighquad = NewLightQuad(float3(0.,-1.,0.5),float3(0.f,64.f,0.f), float3(0.f,64.f,128.f), float3(128.f,64.,0.f), float3(128.0f,.64f,128.f), float3(0.9f,0.9f,0.4f), float3(1.0,0.0,0.0),0.8);
     // 45° at origin Light
 	lighquad = NewLightQuad(float3(0.4,-0.5,0.6),float3(-32.f,32.f,32.f), float3(-32.f,64.f,32.f), float3(32.f,64.,-32.f), float3(32.0f,.32f,-32.f), float3(0.8f,0.8f,0.3f), float3(1.0,0.0,0.0),0.4);
     
@@ -762,7 +723,8 @@ float4 PS(BufferAVertexOut input) : SV_TARGET
 	float2 dither = TriangularNoise2DShereRay(U,iTime);
     pos += float3(dither,0.)*0.02;
     Ray rayObj = NewRay(pos,ray);
-    float3 newColor = Radiance(rayObj,GetRandom());
+	float3 normal;
+    float3 newColor = Radiance(rayObj,GetRandom(), normal);
 
 	// Blend
 	float3 oldColor = tex2D(iChannel0Sampler,U/R).rgb;
@@ -778,11 +740,6 @@ float4 PS(BufferAVertexOut input) : SV_TARGET
 
 technique BufferA
 {
-	pass P0
-	{
-		VertexShader = compile VS_SHADERMODEL VSBufferA();
-		PixelShader = compile PS_SHADERMODEL PS();
-	}
 	pass P0
 	{
 		VertexShader = compile VS_SHADERMODEL VSBufferA();
@@ -825,11 +782,100 @@ CompositionVertexOut VSComposition(CompositionVertexIn input)
 	return vout;
 }
 
+/////// Denoise ///////
+//kernel size, for better perormance it should be reduced to 3
+#define DENOISING_MATRIX_SIZE 3
+#define DENOISING_SAMPLE_DISTANCE 0.0012
+#define MATRIXLENGTH 9
+
+//array is very small, so i think this is fast option
+void insertionSort(inout float3 arr[MATRIXLENGTH]) 
+{ 
+    // sorting r g b channels separately
+    for(int index = 0; index < DENOISING_MATRIX_SIZE; index++)
+    {
+        int i, j; 
+        float key;
+        for (i = 1; i < MATRIXLENGTH; i++)
+        { 
+            key = arr[i][index]; 
+            j = i - 1; 
+    
+            while (j >= 0 && arr[j][index] > key)
+            { 
+                arr[j + 1][index] = arr[j][index]; 
+                j = j - 1; 
+            } 
+            arr[j + 1][index] = key; 
+        } 
+    } 
+}
+
+float4 Denoise(float2 uv){
+    float3 matrixes[MATRIXLENGTH];
+    float2 noiseUV;
+    
+    for(int i = 0; i < MATRIXLENGTH; i++){
+    
+        int x = (i % DENOISING_MATRIX_SIZE) - DENOISING_MATRIX_SIZE / 2;
+        int y = (i / DENOISING_MATRIX_SIZE) - DENOISING_MATRIX_SIZE / 2;
+        
+        noiseUV = uv + float2(float(x) * DENOISING_SAMPLE_DISTANCE, float(y) * DENOISING_SAMPLE_DISTANCE);
+        
+		float4 samp = tex2D(iChannel0Sampler,noiseUV);
+       
+        matrixes[i] = samp.rgb;
+    }
+    
+    insertionSort(matrixes);
+    
+    //median
+    return float4(matrixes[MATRIXLENGTH / 2], 1.);
+}
+
+const float num = 16.;
+const float radius = 5.;
+const float sigma = 3.0;
+const float sigma2 = 6.0;
+
+float4 SimpleDenoise(sampler2D tex, float2 uv, float num, float radius, float sigma, float sigma2)
+{
+	float weight_sum = 0.;
+	float4 weighted_sum = float4(0.,0.,0.,0.);
+    float2 tex_size = ViewportSize.xy;
+
+	for(float i=0.; i<num; i++){
+		float angle = 2.3999629 * i;
+        float radius_squared = i / num;
+
+		float2 pos = sqrt(radius_squared) * float2(sin(angle),cos(angle));
+		float4 value = tex2D(tex,uv + radius * pos / tex_size);
+
+		float4 value_diff = value - tex2D(tex, uv);
+		float weight = exp( -dot(value_diff, value_diff) * sigma -radius_squared * sigma2);
+
+		weight_sum += weight;
+		weighted_sum += weight * value;
+	}
+
+    return weighted_sum / weight_sum;
+}
+
 float4 PS2(float4 position : POSITION0) : COLOR0
 {
-	float4 result = tex2D(bufferASampler, position.xy / ViewportSize.xy);
-	// float4 result = FXAA(bufferASampler, position.xy / ViewportSize.xy,ViewportSize.xy);
-    result.rgb = ExposureCorrect(result.rgb,2.1, -0.8);
+	float4 result = float4(0.,0.,0.,0.);
+	float2 uv = position.xy / ViewportSize.xy;
+	
+	// Left SimpleNoise, Middle No denoise, Right Median Denoise
+	if (uv.x < 0.33f) result = SimpleDenoise(bufferASampler, uv, 16, radius, sigma, sigma2);
+	else if (uv.x < 0.66f) result = tex2D(bufferASampler, position.xy / ViewportSize.xy);
+	else result = Denoise(uv);
+
+	// Black lines 
+	if (uv.x > 0.329f && uv.x < 0.331f) result = float4(0.,0.,0.,1.);
+	if (uv.x > 0.659f && uv.x < 0.661f) result = float4(0.,0.,0.,1.);
+
+    result.rgb = ExposureCorrect(result.rgb,5.0, -0.8);
  
 	return result;
 }

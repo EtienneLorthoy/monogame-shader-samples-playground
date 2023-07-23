@@ -49,6 +49,12 @@
 /processorParam:DebugMode=Auto
 /build:../Playgrounds/MISCubeVoxels/MISCubeVoxelsShader.fx;Shaders/MISCubeVoxelsShader.fx
 
+#begin ../Playgrounds/MISCubeVoxelsDenoise/MISCubeVoxelsDenoiseShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../Playgrounds/MISCubeVoxelsDenoise/MISCubeVoxelsDenoiseShader.fx;Shaders/MISCubeVoxelsDenoiseShader.fx
+
 #begin ../Playgrounds/NormalMapping/SimpleNormalMappingShader.fx
 /importer:EffectImporter
 /processor:EffectProcessor
