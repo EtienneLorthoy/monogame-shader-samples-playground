@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using MonogameShaderPlayground.Helpers;
 using MonogameShaderPlayground.Playgrounds.CubeVoxels;
 using MonogameShaderPlayground.Playgrounds.HologramIridescence;
+using MonogameShaderPlayground.Playgrounds.MISCubeVoxels;
 using MonogameShaderPlayground.Playgrounds.MultipleImportanceSampling;
 using MonogameShaderPlayground.Playgrounds.RayMarching;
 using MonogameShaderPlayground.Playgrounds.RayMarchingShadows;
@@ -75,8 +76,11 @@ namespace MonogameShaderPlayground
             playgrounds.Add(new RayMarchingShadowsShaderPlayground(this, Camera));
             playgrounds.Add(new RayMarchingSoftShadowsPlayground(this, Camera));
 
-            // Multiple Importance Sampling techniques
+            // Multiple Importance Sampling techniques (MIS)
             playgrounds.Add(new MultipleImportanceSamplingPlayground(this, Camera));
+
+            // MIS + Voxel
+            playgrounds.Add(new MISCubeVoxelsPlayground(this, Camera));
 
             // Datastructures
             playgrounds.Add(new SimpleCubeVoxelsPlayground(this, Camera));
@@ -115,10 +119,10 @@ namespace MonogameShaderPlayground
                     playground.Enabled = false;
                     playground.Visible = false;
                     if (Components.Contains(playground)) Components.Remove(playground);
-                    Camera.Target = Vector3.Zero;
-                    Camera.Position = Vector3.One * 2;
-                    Camera.SwingFactor = 2f;
                 }
+                Camera.Target = Vector3.Zero;
+                Camera.Position = Vector3.One * 2;
+                Camera.SwingFactor = 2f;
 
                 playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[index].GetType().Name);
                 playgrounds[index].Enabled = true;
@@ -129,6 +133,7 @@ namespace MonogameShaderPlayground
 
             cameraInfolabel.Text = $"Camera position (x:{Camera.Position.X:0.0}, y:{Camera.Position.Y:0.0}, z:{Camera.Position.Z:0.0})";
             cameraInfolabel.Text += $"\nTarget position (x:{Camera.Target.X:0.0}, y:{Camera.Target.Y:0.0}, z:{Camera.Target.Z:0.0})";
+            cameraInfolabel.Text += $"\nMode {(Camera.PotatoMode ? "Potato" : "Free")} (F: toggle)";
 
             lastKeyboardState = keyboardState;
             base.Update(gameTime);

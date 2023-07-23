@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using MonogameShaderPlayground.Helpers;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework.Input;
 
 namespace MonogameShaderPlayground.Playgrounds.CubeVoxels
 {
@@ -37,15 +36,8 @@ namespace MonogameShaderPlayground.Playgrounds.CubeVoxels
             effect = hotReloadShaderManager.Load("Shaders/SimpleCubeVoxelsShader");
             effect.Parameters["ScreenSize"].SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
 
-
             var meshVertices = new List<VertexPositionNormalTexture>();
             meshVertices.AddRange(VertexsBuilderHelper.ConstructVertexPositionNormalTextureCube(Vector3.Zero, 100f));
-            // for (int i = -1; i < 2; i++)
-            //     for (int j = -1; j < 2; j++)
-            //         for (int k = -1; k < 2; k++)
-            //         {
-            //             meshVertices.AddRange(VertexsBuilderHelper.ConstructVertexPositionNormalTextureCube(new Vector3(2f * i, 2f * j, 2f * k), 8f));
-            //         }
             vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionNormalTexture), meshVertices.Count, BufferUsage.WriteOnly);
             vertexBuffer.SetData(meshVertices.ToArray());
 

@@ -43,6 +43,12 @@
 /processorParam:DebugMode=Auto
 /build:../Playgrounds/MultipleImportanceSampling/MultipleImportanceSamplingShader.fx;Shaders/MultipleImportanceSamplingShader.fx
 
+#begin ../Playgrounds/MISCubeVoxels/MISCubeVoxelsShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:../Playgrounds/MISCubeVoxels/MISCubeVoxelsShader.fx;Shaders/MISCubeVoxelsShader.fx
+
 #begin ../Playgrounds/NormalMapping/SimpleNormalMappingShader.fx
 /importer:EffectImporter
 /processor:EffectProcessor
