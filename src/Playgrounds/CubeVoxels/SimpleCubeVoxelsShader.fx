@@ -3,8 +3,8 @@
 	#define VS_SHADERMODEL vs_3_0
 	#define PS_SHADERMODEL ps_3_0
 #else
-	#define VS_SHADERMODEL vs_5_0
-	#define PS_SHADERMODEL ps_5_0
+	#define VS_SHADERMODEL vs_4_0
+	#define PS_SHADERMODEL ps_4_0
 #endif
 
 
@@ -161,7 +161,6 @@ float4 PS(VertexOut input) : SV_TARGET
 //==============================================================================
 // Techniques
 //==============================================================================
-// #if SHADEREDITOR
 technique Technique0
 {
 	pass P0
@@ -170,4 +169,3 @@ technique Technique0
 		PixelShader = compile PS_SHADERMODEL PS();
 	}
 }; 
-// #endif

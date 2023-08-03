@@ -29,12 +29,7 @@ namespace MonogameShaderPlayground.Playgrounds.MISCubeVoxels
         public MISCubeVoxelsPlayground(Game game, BasicCamera camera) : base(game)
         {
             this.camera = camera;
-            hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\MISCubeVoxels\MISCubeVoxelsShader.fx");
-                    
-            // Cool looking angle
-            camera.Position = new Vector3(-6, 5.4f, -7.4f);
-            camera.Target = new Vector3(vms / 2, 0, vms / 2);
-            camera.SwingFactor = 100f;    
+            hotReloadShaderManager = new HotReloadShaderManager(game, @"Playgrounds\MISCubeVoxels\MISCubeVoxelsShader.fx"); 
         }
 
         protected override void OnEnabledChanged(object sender, EventArgs args)

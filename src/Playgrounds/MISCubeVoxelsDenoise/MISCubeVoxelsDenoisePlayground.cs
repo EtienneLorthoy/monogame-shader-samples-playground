@@ -35,20 +35,17 @@ namespace MonogameShaderPlayground.Playgrounds.MISCubeVoxelsDenoise
         
             this.gizmoLight = new Gizmo(game, new Vector3(0, 0, 0), 5.0f);
             Game.Components.Add(gizmoLight);
-            
-            // Cool looking angle
-            camera.Position = new Vector3(-6, 5.4f, -7.4f);
-            camera.Target = new Vector3(vms / 2, 0, vms / 2);
-            camera.SwingFactor = 100f;    
         }
 
         protected override void OnEnabledChanged(object sender, EventArgs args)
         {
             if (Enabled) 
-            {
+            {     
                 // Cool looking angle
-                camera.Position = new Vector3(-6, 5.4f, -7.4f);
-                camera.Target = new Vector3(vms / 2, 0, vms / 2);
+                camera.Position = new Vector3(-21, 24f, 42f);
+                camera.Target = new Vector3(-20, 23.6f, 42.2f);
+                camera.Target.Normalize();
+                camera.PotatoMode = false;
                 camera.SwingFactor = 100f;
             }
             else

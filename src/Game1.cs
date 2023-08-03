@@ -90,9 +90,16 @@ namespace MonogameShaderPlayground
             // Monogame or C# interop specific techniques
             playgrounds.Add(new CustomVertexDeclarationPlayground(this, Camera));
 
+            foreach (var playground in playgrounds)
+            {
+                playground.Enabled = false;
+                playground.Visible = false;
+            }
+
             // Starting playground
             var startingIndex = 15;
             this.Components.Add(playgrounds[startingIndex]);
+            playgrounds[startingIndex].Enabled = playgrounds[startingIndex].Visible = true;
             this.playgroundInfolabel.Text = BuildDebugOutputString(playgrounds[startingIndex].GetType().Name);
 
             // Utils

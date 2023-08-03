@@ -14,7 +14,11 @@ namespace MonogameShaderPlayground.Helpers
 
         public Vector3 Direction { get => cameraDirection; }
         public Vector3 Position { get => cameraPosition; set => cameraPosition = value; }
-        public Vector3 Target { get => cameraTarget; set => cameraTarget = value; }
+        public Vector3 Target 
+        { 
+            get => cameraTarget; 
+            set => cameraTarget = value; 
+        }
 
         public float SwingFactor;
         public bool PotatoMode = true;
